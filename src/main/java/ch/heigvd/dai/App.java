@@ -12,6 +12,7 @@ import ch.heigvd.dai.controllers.*;
 import ch.heigvd.dai.models.User;
 
 @CommandLine.Command(description = "CTF manager backend", version = "1.0.0", subcommands = {
+    // Maybe add a subcommand to run the database scripts
 }, scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
 public class App implements Callable<Integer> {
 
