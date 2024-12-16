@@ -4,6 +4,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.javalin.Javalin;
+import io.javalin.openapi.plugin.OpenApiPlugin;
+import io.javalin.openapi.plugin.redoc.ReDocPlugin;
+import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import picocli.CommandLine;
 import ch.heigvd.dai.controllers.*;
 import ch.heigvd.dai.models.User;
@@ -22,7 +25,13 @@ public class App implements Callable<Integer> {
 
   @Override
   public Integer call() throws Exception {
-    Javalin app = Javalin.create(/* config */);
+    Javalin app = Javalin.create(config -> {
+      config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
+
+      }));
+      config.registerPlugin(new SwaggerPlugin());
+      config.registerPlugin(new ReDocPlugin());
+    });
 
     // TODO: Database
     ConcurrentHashMap<Integer, User> users = new ConcurrentHashMap<>();

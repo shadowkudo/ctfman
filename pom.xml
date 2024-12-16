@@ -8,6 +8,15 @@
   <artifactId>ctfman</artifactId>
   <version>1.0.0</version>
 
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javalin.version>6.3.0</javalin.version>
+    <javalin.openapi.version>6.3.0</javalin.openapi.version>
+  </properties>
+
+
   <distributionManagement>
     <repository>
       <id>github</id>
@@ -31,7 +40,7 @@
     <dependency>
       <groupId>io.javalin</groupId>
       <artifactId>javalin</artifactId>
-      <version>6.3.0</version>
+      <version>${javalin.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -48,45 +57,28 @@
       <artifactId>postgresql</artifactId>
       <version>42.7.4</version>
     </dependency>
+    <!-- OpenApi plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-openapi-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
+    <!-- Swagger plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-swagger-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
+    <!-- ReDoc plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-redoc-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
   </dependencies>
-
-  <properties>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
 
   <build>
     <plugins>
-      <!-- https://mvnrepository.com/artifact/com.diffplug.spotless/spotless-maven-plugin -->
-      <!-- <plugin> -->
-      <!--   <groupId>com.diffplug.spotless</groupId> -->
-      <!--   <artifactId>spotless-maven-plugin</artifactId> -->
-      <!--   <version>2.43.0</version> -->
-      <!--   <configuration> -->
-      <!--     <pom> -->
-      <!--       <sortPom> -->
-      <!--         <expandEmptyElements>false</expandEmptyElements> -->
-      <!--         <sortPlugins>groupId,artifactId</sortPlugins> -->
-      <!--       </sortPom> -->
-      <!--     </pom> -->
-      <!--     <java> -->
-      <!--       <googleJavaFormat /> -->
-      <!--       <importOrder /> -->
-      <!--       <removeUnusedImports /> -->
-      <!--       <formatAnnotations /> -->
-      <!--     </java> -->
-      <!--   </configuration> -->
-      <!--   <executions> -->
-      <!--     <execution> -->
-      <!--       <goals> -->
-      <!--         <goal>check</goal> -->
-      <!--       </goals> -->
-      <!--       <phase>package</phase> -->
-      <!--     </execution> -->
-      <!--   </executions> -->
-      <!-- </plugin> -->
-
       <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -125,5 +117,23 @@
         </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.1</version>
+          <configuration>
+            <annotationProcessorPaths>
+              <annotationProcessorPath>
+                <groupId>io.javalin.community.openapi</groupId>
+                <artifactId>openapi-annotation-processor</artifactId>
+                <version>${javalin.openapi.version}</version>
+              </annotationProcessorPath>
+            </annotationProcessorPaths>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 </project>

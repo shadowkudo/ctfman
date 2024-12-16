@@ -1,6 +1,11 @@
 package ch.heigvd.dai.controllers;
 
 import io.javalin.http.*;
+import io.javalin.openapi.HttpMethod;
+import io.javalin.openapi.OpenApi;
+import io.javalin.openapi.OpenApiContent;
+import io.javalin.openapi.OpenApiResponse;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +60,10 @@ public class UsersController {
     ctx.json(user);
   }
 
+  @OpenApi(summary = "Get all users", operationId = "getAllUsers", path = "/users", methods = HttpMethod.GET, tags = {
+      "User" }, responses = {
+          @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User[].class) })
+      })
   public void getMany(Context ctx) {
     String firstName = ctx.queryParam("firstName");
     String lastName = ctx.queryParam("lastName");
