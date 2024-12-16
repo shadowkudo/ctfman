@@ -31,6 +31,8 @@ public class App implements Callable<Integer> {
     AuthController authController = new AuthController(users);
     UsersController usersController = new UsersController(users);
 
+    app.get("/", ctx -> ctx.result("Hello World"));
+
     // Auth routes
     app.post("/login", authController::login);
     app.post("/logout", authController::logout);
