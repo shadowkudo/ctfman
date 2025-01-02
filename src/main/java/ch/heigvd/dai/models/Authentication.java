@@ -22,11 +22,28 @@ public class Authentication {
     this.deletedAt = deletedAt;
   }
 
+  public String getPasswordHash() {
+    return passwordHash;
+  }
+
+  public void setPasswordHash(String passwordHash) {
+    this.passwordHash = passwordHash;
+  }
+
   public Timestamp getCreatedAt() {
     return createdAt;
+  }
+
+  public void setCreatedAt(Timestamp createdAt) {
+    this.createdAt = createdAt;
   }
 
   public Timestamp getDeletedAt() {
     return deletedAt;
   }
+
+  public void setDeletedAt(Timestamp deletedAt) {
+    this.deletedAt = deletedAt;
+  }
+
 }

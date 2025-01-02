@@ -5,7 +5,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
-import ch.heigvd.dai.controllers.UsersController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.models.User;
 import io.javalin.Javalin;
@@ -62,25 +61,14 @@ public class App implements Callable<Integer> {
       });
     });
 
-    ConcurrentHashMap<Integer, User> users = new ConcurrentHashMap<>();
-
     // Controllers
-    AuthController authController = new AuthController(users);
-    UsersController usersController = new UsersController(users);
+    AuthController authController = new AuthController();
 
     app.get("/", ctx -> ctx.result("Hello World"));
 
     // Auth routes
     app.post("/login", authController::login);
     app.post("/logout", authController::logout);
-    app.get("/profile", authController::profile);
-
-    // Users routes
-    app.post("/users", usersController::create);
-    app.get("/users", usersController::getMany);
-    app.get("/users/{id}", usersController::getOne);
-    app.put("/users/{id}", usersController::update);
-    app.delete("/users/{id}", usersController::delete);
 
     // TODO: create server config to use the address
     app.start(port);
