@@ -1,12 +1,11 @@
 package ch.heigvd.dai;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
-import ch.heigvd.dai.models.User;
+import ch.heigvd.dai.middlewares.AuthMiddleware;
 import io.javalin.Javalin;
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.post;
@@ -61,6 +60,9 @@ public class App implements Callable<Integer> {
       });
     });
 
+    // Global middlewares
+    app.before(new AuthMiddleware());
+
     // Controllers
     AuthController authController = new AuthController();
 
@@ -69,6 +71,7 @@ public class App implements Callable<Integer> {
     // Auth routes
     app.post("/login", authController::login);
     app.post("/logout", authController::logout);
+    app.post("/profile", authController::profile);
 
     // TODO: create server config to use the address
     app.start(port);

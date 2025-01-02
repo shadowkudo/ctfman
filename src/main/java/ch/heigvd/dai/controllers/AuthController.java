@@ -11,7 +11,6 @@ import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiResponse;
 
 import java.security.SecureRandom;
-import java.security.spec.KeySpec;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -38,10 +37,10 @@ public class AuthController {
       "Auth" }, requestBody = @OpenApiRequestBody(description = "Username and password for authentication", required = true, content = {
           @OpenApiContent(from = LoginRequest.class, type = ContentType.JSON)
       }), responses = {
-          @OpenApiResponse(status = "200", description = "login successful", headers = {
-
+          @OpenApiResponse(status = "204", description = "login successful", headers = {
+          // TODO: document session header
           }),
-          @OpenApiResponse(status = "403", description = "login failed, invalid username or password")
+          @OpenApiResponse(status = "401", description = "login failed, invalid username or password")
       })
   public void login(Context ctx) {
     LoginRequest rq = ctx.bodyAsClass(LoginRequest.class);
@@ -67,6 +66,7 @@ public class AuthController {
         throw new UnauthorizedResponse();
       }
 
+      // TODO: set the expiration in a config
       Timestamp expires = Timestamp.valueOf(LocalDateTime.now().plus(30, ChronoUnit.DAYS));
 
       while (true) {
@@ -93,9 +93,31 @@ public class AuthController {
 
   }
 
+  @OpenApi(path = "/logout", methods = HttpMethod.POST, summary = "logout", operationId = "logout", tags = {
+      "Auth" }, responses = {
+          @OpenApiResponse(status = "204", description = "Logged out", headers = {
+
+          })
+      })
   public void logout(Context ctx) {
     ctx.removeCookie("session");
     ctx.status(HttpStatus.NO_CONTENT);
+  }
+
+  @OpenApi(path = "/profile", methods = HttpMethod.POST, summary = "get profile", operationId = "profile", tags = {
+      "Auth" }, responses = {
+          @OpenApiResponse(status = "204", description = "Profile details", content = {
+              @OpenApiContent(from = User.class) })
+      })
+  public void profile(Context ctx) {
+    User user = ctx.attribute("user");
+
+    if (user == null) {
+      ctx.status(HttpStatus.UNAUTHORIZED);
+      return;
+    }
+
+    ctx.json(user);
   }
 
   public record LoginRequest(String username, String password) {
