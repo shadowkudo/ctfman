@@ -116,4 +116,17 @@ public class User extends Authentication {
     this.isAuthor = isAuthor;
   }
 
+  public Boolean hasRole(Role role) {
+    return switch (role) {
+      case ADMIN -> isAdmin;
+      case AUTHOR -> isAuthor;
+      case CHALLENGER -> isChallenger;
+      case MODERATOR -> isModerator;
+    };
+  }
+
+  public static enum Role {
+    CHALLENGER, ADMIN, MODERATOR, AUTHOR
+  }
+
 }

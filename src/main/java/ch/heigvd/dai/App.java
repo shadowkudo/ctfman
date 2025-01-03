@@ -6,6 +6,7 @@ import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
+import ch.heigvd.dai.middlewares.SessionMiddleware;
 import io.javalin.Javalin;
 import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.post;
@@ -61,7 +62,11 @@ public class App implements Callable<Integer> {
     });
 
     // Global middlewares
-    app.before(new AuthMiddleware());
+    app.before(new SessionMiddleware());
+
+    // Requires the user to be connected before accessing this endpoint
+    app.before("/teams", new AuthMiddleware());
+    app.before("/teams/*", new AuthMiddleware());
 
     // Controllers
     AuthController authController = new AuthController();
