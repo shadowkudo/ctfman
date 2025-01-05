@@ -1,4 +1,4 @@
-package ch.heigvd.dai;
+package ch.heigvd.dai.commands;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,11 +19,13 @@ import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.redoc.ReDocPlugin;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
 import picocli.CommandLine;
+import picocli.CommandLine.Mixin;
 
-@CommandLine.Command(description = "CTF manager backend", version = "1.0.0", subcommands = {
-    // Maybe add a subcommand to run the database scripts
-}, scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
+@CommandLine.Command(name = "serve", description = "serve the application", scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
 public class App implements Callable<Integer> {
+
+  @Mixin
+  private Root.Options root;
 
   @CommandLine.Option(names = { "-a",
       "--address" }, description = "The address to listen on", defaultValue = "${SERVER_ADDRESS:-0.0.0.0}")
@@ -33,22 +35,10 @@ public class App implements Callable<Integer> {
       "--port" }, description = "The port to listen on", defaultValue = "${SERVER_PORT:-8080}")
   private int port;
 
-  @CommandLine.Option(names = {
-      "--db-url" }, description = "The database jdbc url", defaultValue = "jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}")
-  private String dbUrl;
-
-  @CommandLine.Option(names = {
-      "--db-user" }, description = "The database user", defaultValue = "${DB_USER:-ctfman}")
-  private String dbUser;
-
-  @CommandLine.Option(names = {
-      "--db-password" }, description = "The database password", defaultValue = "${DB_USER:-ctfman}")
-  private String dbPassword;
-
   @Override
   public Integer call() throws Exception {
 
-    DB.configure(dbUrl, dbUser, dbPassword);
+    DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
 
     Javalin app = Javalin.create(config -> {
       config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
