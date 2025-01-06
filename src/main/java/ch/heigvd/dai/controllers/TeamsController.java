@@ -7,6 +7,7 @@ import ch.heigvd.dai.models.Team;
 import io.javalin.apibuilder.CrudHandler;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
+import io.javalin.http.MethodNotAllowedResponse;
 import io.javalin.openapi.*;
 
 public class TeamsController implements CrudHandler {
@@ -29,7 +30,7 @@ public class TeamsController implements CrudHandler {
   @OpenApi(path = "/teams", methods = HttpMethod.POST, summary = "create a team", operationId = "createTeam", tags = {
       "Team" })
   public void create(Context ctx) {
-    ctx.json("create");
+    throw new MethodNotAllowedResponse();
   }
 
   @OpenApi(path = "/teams/{id}", methods = HttpMethod.GET, summary = "get a team", operationId = "getOneTeam", tags = {
@@ -37,18 +38,18 @@ public class TeamsController implements CrudHandler {
           @OpenApiResponse(status = "200", content = { @OpenApiContent(from = Team.class) })
       })
   public void getOne(Context ctx, String id) {
-    ctx.json("getOne");
+    throw new MethodNotAllowedResponse();
   }
 
   @OpenApi(path = "/teams/{id}", methods = { HttpMethod.PUT,
       HttpMethod.PATCH }, summary = "update a team", operationId = "updateTeam", tags = { "Team" })
   public void update(Context ctx, String id) {
-    ctx.json("update");
+    throw new MethodNotAllowedResponse();
   }
 
   @OpenApi(path = "/teams/{id}", methods = HttpMethod.DELETE, summary = "delete a team", operationId = "deleteTeam", tags = {
       "Team" })
   public void delete(Context ctx, String id) {
-    ctx.json("delete");
+    throw new MethodNotAllowedResponse();
   }
 }
