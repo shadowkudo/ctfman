@@ -69,10 +69,10 @@
     </snapshotRepository>
   </distributionManagement>
   <properties>
-    <javalin.openapi.version>6.3.0</javalin.openapi.version>
+    <javalin.openapi.version>6.4.0</javalin.openapi.version>
     <maven.compiler.target>21</maven.compiler.target>
     <maven.compiler.source>21</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <javalin.version>6.3.0</javalin.version>
+    <javalin.version>6.4.0</javalin.version>
   </properties>
 </project>

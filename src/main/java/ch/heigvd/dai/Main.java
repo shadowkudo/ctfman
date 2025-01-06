@@ -2,6 +2,7 @@ package ch.heigvd.dai;
 
 import java.io.File;
 
+import ch.heigvd.dai.commands.Root;
 import picocli.CommandLine;
 
 public class Main {
@@ -12,7 +13,7 @@ public class Main {
         new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath())
             .getName();
 
-    Integer code = new CommandLine(new App()).setCommandName(jarFilename).execute(args);
+    Integer code = new CommandLine(new Root()).setCommandName(jarFilename).execute(args);
 
     if (code != 0) {
       System.exit(code);
