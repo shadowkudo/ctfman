@@ -1,11 +1,5 @@
 package ch.heigvd.dai.controllers;
 
-import java.sql.SQLException;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.heigvd.dai.models.Team;
 import io.javalin.apibuilder.CrudHandler;
 import io.javalin.http.Context;
@@ -14,14 +8,25 @@ import io.javalin.http.InternalServerErrorResponse;
 import io.javalin.http.MethodNotAllowedResponse;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.openapi.*;
+import java.sql.SQLException;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TeamsController implements CrudHandler {
 
   private static final Logger LOG = LoggerFactory.getLogger(TeamsController.class);
 
-  @OpenApi(path = "/teams", methods = HttpMethod.GET, summary = "get all teams", operationId = "getAllTeams", tags = {
-      "Team" }, responses = {
-          @OpenApiResponse(status = "200", content = { @OpenApiContent(from = Team[].class) })
+  @OpenApi(
+      path = "/teams",
+      methods = HttpMethod.GET,
+      summary = "get all teams",
+      operationId = "getAllTeams",
+      tags = {"Team"},
+      responses = {
+        @OpenApiResponse(
+            status = "200",
+            content = {@OpenApiContent(from = Team[].class)})
       })
   public void getAll(Context ctx) {
     try {
@@ -32,23 +37,41 @@ public class TeamsController implements CrudHandler {
       LOG.error(ex.toString());
       throw new InternalServerErrorResponse();
     }
-
   }
 
-  @OpenApi(path = "/teams", methods = HttpMethod.POST, summary = "create a team", operationId = "createTeam", tags = {
-      "Team" })
+  @OpenApi(
+      path = "/teams",
+      methods = HttpMethod.POST,
+      summary = "create a team",
+      operationId = "createTeam",
+      tags = {"Team"})
   public void create(Context ctx) {
     throw new MethodNotAllowedResponse();
   }
 
-  @OpenApi(path = "/teams/{teamName}", methods = HttpMethod.GET, summary = "get a team", operationId = "getOneTeam", tags = {
-      "Team" }, pathParams = {
-          @OpenApiParam(name = "teamName", type = String.class, description = "The team name") }, responses = {
-              @OpenApiResponse(status = "200", description = "The team details", content = {
-                  @OpenApiContent(from = Team.class) }),
-              @OpenApiResponse(status = "404", description = "No team with this name", content = @OpenApiContent(from = ErrorResponse.class)),
-              @OpenApiResponse(status = "403", description = "User not authenticated", content = @OpenApiContent(from = ErrorResponse.class))
-          })
+  @OpenApi(
+      path = "/teams/{teamName}",
+      methods = HttpMethod.GET,
+      summary = "get a team",
+      operationId = "getOneTeam",
+      tags = {"Team"},
+      pathParams = {
+        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+      },
+      responses = {
+        @OpenApiResponse(
+            status = "200",
+            description = "The team details",
+            content = {@OpenApiContent(from = Team.class)}),
+        @OpenApiResponse(
+            status = "404",
+            description = "No team with this name",
+            content = @OpenApiContent(from = ErrorResponse.class)),
+        @OpenApiResponse(
+            status = "403",
+            description = "User not authenticated",
+            content = @OpenApiContent(from = ErrorResponse.class))
+      })
   public void getOne(Context ctx, String teamName) {
     try {
 
@@ -67,16 +90,28 @@ public class TeamsController implements CrudHandler {
     }
   }
 
-  @OpenApi(path = "/teams/{teamName}", methods = { HttpMethod.PUT,
-      HttpMethod.PATCH }, summary = "update a team", operationId = "updateTeam", tags = { "Team" }, pathParams = {
-          @OpenApiParam(name = "teamName", type = String.class, description = "The team name") })
+  @OpenApi(
+      path = "/teams/{teamName}",
+      methods = {HttpMethod.PUT, HttpMethod.PATCH},
+      summary = "update a team",
+      operationId = "updateTeam",
+      tags = {"Team"},
+      pathParams = {
+        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+      })
   public void update(Context ctx, String id) {
     throw new MethodNotAllowedResponse();
   }
 
-  @OpenApi(path = "/teams/{teamName}", methods = HttpMethod.DELETE, summary = "delete a team", operationId = "deleteTeam", tags = {
-      "Team" }, pathParams = {
-          @OpenApiParam(name = "teamName", type = String.class, description = "The team name") })
+  @OpenApi(
+      path = "/teams/{teamName}",
+      methods = HttpMethod.DELETE,
+      summary = "delete a team",
+      operationId = "deleteTeam",
+      tags = {"Team"},
+      pathParams = {
+        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+      })
   public void delete(Context ctx, String id) {
     throw new MethodNotAllowedResponse();
   }

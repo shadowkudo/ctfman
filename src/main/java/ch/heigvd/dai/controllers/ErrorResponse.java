@@ -3,7 +3,8 @@ package ch.heigvd.dai.controllers;
 import java.util.Map;
 
 /**
- * @see https://github.com/javalin/javalin-samples/blob/main/javalin6/javalin-openapi-example/src/main/java/io/javalin/example/java/ErrorResponse.java
+ * @see
+ *     https://github.com/javalin/javalin-samples/blob/main/javalin6/javalin-openapi-example/src/main/java/io/javalin/example/java/ErrorResponse.java
  */
 class ErrorResponse {
   private String title;
@@ -11,8 +12,7 @@ class ErrorResponse {
   private String type;
   private Map<String, String> details;
 
-  public ErrorResponse() {
-  }
+  public ErrorResponse() {}
 
   public ErrorResponse(String title, int status, String type, Map<String, String> details) {
     this.title = title;
