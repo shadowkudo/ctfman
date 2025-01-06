@@ -38,12 +38,24 @@ public class Team extends Authentication {
     return authentication;
   }
 
+  public void setAuthentication(String authentication) {
+    this.authentication = authentication;
+  }
+
   public String getDescription() {
     return description;
   }
 
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
   public String getCountry() {
     return country;
+  }
+
+  public void setCountry(String country) {
+    this.country = country;
   }
 
   public static List<Team> getAll() throws SQLException {
@@ -61,4 +73,22 @@ public class Team extends Authentication {
 
     return teams;
   }
+
+  public static @Nullable Team getByName(String name) throws SQLException {
+    String query = "SELECT authentication, description, country, created_at, deleted_at FROM team JOIN authentication a ON team.authentication = a.identification WHERE authentication = ?";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, name);
+      ResultSet res = stmt.executeQuery();
+
+      if (!res.next()) {
+        return null;
+      }
+
+      return new Team(res.getString("authentication"), res.getString("description"), res.getString("country"),
+          null, res.getTimestamp("created_at"), res.getTimestamp("deleted_at"));
+    }
+  }
+
 }

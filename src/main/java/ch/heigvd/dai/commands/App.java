@@ -42,7 +42,7 @@ public class App implements Callable<Integer> {
       config.registerPlugin(new ReDocPlugin());
 
       config.router.apiBuilder(() -> {
-        crud("/teams/{id}", new TeamsController());
+        crud("/teams/{teamName}", new TeamsController());
       });
     });
 
