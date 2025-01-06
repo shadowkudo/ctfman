@@ -24,24 +24,16 @@ public class App implements Callable<Integer> {
   private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
   @Mixin
-  private Root.Options root;
-
-  @CommandLine.Option(names = { "-a",
-      "--address" }, description = "The address to listen on", defaultValue = "${SERVER_ADDRESS:-0.0.0.0}")
-  private String address;
-
-  @CommandLine.Option(names = { "-p",
-      "--port" }, description = "The port to listen on", defaultValue = "${SERVER_PORT:-8080}")
-  private int port;
+  private Options options;
 
   @Override
   public Integer call() throws Exception {
 
-    DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
+    DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
     Javalin app = Javalin.create(config -> {
-      config.jetty.defaultHost = address;
-      config.jetty.defaultPort = port;
+      config.jetty.defaultHost = options.address;
+      config.jetty.defaultPort = options.port;
 
       config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
 
@@ -78,5 +70,15 @@ public class App implements Callable<Integer> {
       DB.close();
     }));
     return 0;
+  }
+
+  public static class Options extends Root.Options {
+    @CommandLine.Option(names = { "-a",
+        "--address" }, description = "The address to listen on (default: ${DEFAULT-VALUE})", defaultValue = "${SERVER_ADDRESS:-0.0.0.0}")
+    private String address;
+
+    @CommandLine.Option(names = { "-p",
+        "--port" }, description = "The port to listen on (default: ${DEFAULT-VALUE})", defaultValue = "${SERVER_PORT:-8080}")
+    private int port;
   }
 }

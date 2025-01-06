@@ -22,15 +22,15 @@ public class Root implements Callable<Integer> {
   public static class Options {
 
     @Option(names = {
-        "--db-url" }, description = "The database jdbc url", defaultValue = "jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}")
+        "--db-url" }, description = "The database jdbc url (default: jdbc:postgresql://<DB_HOST>:<DB_PORT:-5432>/<DB_NAME>)", defaultValue = "jdbc:postgresql://${DB_HOST}:${DB_PORT:-5432}/${DB_NAME}")
     protected String dbUrl;
 
     @Option(names = {
-        "--db-user" }, description = "The database user", defaultValue = "${DB_USER:-ctfman}")
+        "--db-user" }, description = "The database user (default: ${DEFAULT-VALUE})", defaultValue = "${DB_USER:-ctfman}")
     protected String dbUser;
 
     @Option(names = {
-        "--db-password" }, description = "The database password", defaultValue = "${DB_USER:-ctfman}")
+        "--db-password" }, description = "The database password (default: ${DEFAULT-VALUE})", defaultValue = "${DB_USER:-ctfman}")
     protected String dbPassword;
   }
 
