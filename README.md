@@ -8,13 +8,14 @@
     <li>
         <a href="#built-with">Built With</a>
     </li>
+    <li><a href="#introduction">Introduction</a></li>
     <li>
-        <a href="#Introduction">Introduction</a>
         <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#development">Development</a></li>
         <li><a href="#docker">Docker</a></li>
+        <li><a href="#docker-compose">Docker Compose</a></li>
       </ul>
     </li>
     <li><a href="#license">License</a></li>
@@ -83,6 +84,11 @@ The goal of `CTFman` - a web application using a database - is to efficiently ma
 
 #### Development
 
+Clone this repository with either `ssh` or `http`, but we recommend using `ssh` as it is more secure.
+
+```sh
+git clone git@github.com:shadowkudo/ctfman.git
+```
 Use the maven wrapper to install dependencies, build and package the project.
 
 ```sh
@@ -94,27 +100,65 @@ Use the maven wrapper to install dependencies, build and package the project.
 java -jar target/<filename>.jar --help
 ```
 
-#### Docker
+#### Running with Docker
 
-The application can be used with docker.
-
-#### Github actions
-
-If you want to test the `Github actions` on your machine, you can use [act](https://github.com/nektos/act).
-
-Before you launch any workflow, make sure you have created a repository secret named `AUTH_TOKEN`.
-
-Then, create a file named `.secrets` which should contain the following:
-
-```env
-AUTH_TOKEN=<YOUR_AUTH_TOKEN>
-```
-
-Finally, launch the publish workflow (which publishes the mvn package to Github repository) with the following command:
+Build the Docker image and publish it to GitHub Container Registry:
 
 ```sh
-act --secret-file .secrets
+docker build -t ghcr.io/<username>/ctfman:latest
+docker push ghcr.io/<username>/ctfman:latest
 ```
+
+#### Running with Docker Compose
+
+Run the application using Docker Compose:
+
+```sh
+docker compose --profile dev up -d
+```
+
+#### Usage
+
+1. Starting the database
+```sh
+docker compose up db -d
+```
+2. Setting up the database and populate it with data
+```sh
+docker compose run --rm prod setup --seed
+```
+3. Starting the web application
+```sh
+docker compose up prod -d
+```
+4. Accessing the application in a browser (tested with `Firefox`)
+```sh
+firefox https://ctfman.cybernest.ch
+```
+
+<!-- DOCUMENTATION -->
+
+## Documentation
+
+### API
+
+With `Swagger`, documentation is created during coding; see the endpoint `/swagger` or `/redoc` to look at the API documentation.
+
+#### Examples using Curl
+
+TODO
+
+### VM - Azure
+
+TODO
+
+### DNS zone
+
+TODO
+
+#### Proof using nslookup
+
+TODO
 
 <!-- CONTRIBUTING -->
 
@@ -145,6 +189,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 - [Mondotosz](https://github.com/Mondotosz)
 - [Shadowkudo](https://github.com/shadowkudo)
 - [Arnoheigvd](https://github.com/arnoheigvd)
+
+> [!IMPORTANT]
+> Have fun !
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
