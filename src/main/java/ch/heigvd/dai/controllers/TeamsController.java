@@ -46,11 +46,12 @@ public class TeamsController implements CrudHandler {
           @OpenApiParam(name = "teamName", type = String.class, description = "The team name") }, responses = {
               @OpenApiResponse(status = "200", description = "The team details", content = {
                   @OpenApiContent(from = Team.class) }),
-              @OpenApiResponse(status = "404", description = "No team with this name"),
-              @OpenApiResponse(status = "403", description = "User not authenticated")
+              @OpenApiResponse(status = "404", description = "No team with this name", content = @OpenApiContent(from = ErrorResponse.class)),
+              @OpenApiResponse(status = "403", description = "User not authenticated", content = @OpenApiContent(from = ErrorResponse.class))
           })
   public void getOne(Context ctx, String teamName) {
     try {
+
       Team team = Team.getByName(teamName);
 
       if (team == null) {
@@ -66,14 +67,16 @@ public class TeamsController implements CrudHandler {
     }
   }
 
-  @OpenApi(path = "/teams/{id}", methods = { HttpMethod.PUT,
-      HttpMethod.PATCH }, summary = "update a team", operationId = "updateTeam", tags = { "Team" })
+  @OpenApi(path = "/teams/{teamName}", methods = { HttpMethod.PUT,
+      HttpMethod.PATCH }, summary = "update a team", operationId = "updateTeam", tags = { "Team" }, pathParams = {
+          @OpenApiParam(name = "teamName", type = String.class, description = "The team name") })
   public void update(Context ctx, String id) {
     throw new MethodNotAllowedResponse();
   }
 
-  @OpenApi(path = "/teams/{id}", methods = HttpMethod.DELETE, summary = "delete a team", operationId = "deleteTeam", tags = {
-      "Team" })
+  @OpenApi(path = "/teams/{teamName}", methods = HttpMethod.DELETE, summary = "delete a team", operationId = "deleteTeam", tags = {
+      "Team" }, pathParams = {
+          @OpenApiParam(name = "teamName", type = String.class, description = "The team name") })
   public void delete(Context ctx, String id) {
     throw new MethodNotAllowedResponse();
   }
