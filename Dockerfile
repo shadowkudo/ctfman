@@ -29,7 +29,7 @@ RUN apk update && \
 
 WORKDIR /app
 
-ENTRYPOINT [ "watchexec", "-r", "--exts" , "java", "./mvnw package && java -jar ./target/ctfman-1.0.0.jar" ]
+ENTRYPOINT [ "watchexec", "-r", "--exts" , "java", "./mvnw package && java -jar -Dorg.slf4j.simpleLogger.defaultLogLevel=debug ./target/ctfman-1.0.0.jar" ]
 
 FROM eclipse-temurin:21-jre-alpine AS prod
 

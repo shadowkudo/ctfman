@@ -13,9 +13,13 @@ import io.javalin.openapi.OpenApiResponse;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 import java.util.Base64;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
@@ -23,6 +27,9 @@ public class AuthController {
   // TODO: check if there is anything more secure/better for the token
   private static final SecureRandom rnd = new SecureRandom();
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+  private static final TemporalAmount VALIDITY_PERIOD = Duration.ofDays(30);
+
+  private static final Logger LOG = LoggerFactory.getLogger(AuthController.class);
 
   private static String generateToken() {
     byte[] randomBytes = new byte[32];
@@ -49,25 +56,16 @@ public class AuthController {
       throw new UnauthorizedResponse();
     }
 
-    System.out.println("trying to login with: " + rq.username + " and " + rq.password);
-
     try {
 
       User user = User.findByName(rq.username);
 
-      if (user == null) {
-        System.out.println("user not found");
-      } else {
-        System.out.println("user found with password: " + user.getPasswordHash());
-      }
-
-      // TODO: use salt
+      // WARN: Passwords aren't hashed which is a security risk.
       if (user == null || !BCrypt.verifyer().verify(rq.password.toCharArray(), user.getPasswordHash()).verified) {
         throw new UnauthorizedResponse();
       }
 
-      // TODO: set the expiration in a config
-      Timestamp expires = Timestamp.valueOf(LocalDateTime.now().plus(30, ChronoUnit.DAYS));
+      Timestamp expires = Timestamp.valueOf(LocalDateTime.now().plus(VALIDITY_PERIOD));
 
       while (true) {
         Session session = new Session(generateToken(), rq.username, expires);
@@ -86,8 +84,7 @@ public class AuthController {
         }
       }
     } catch (SQLException ex) {
-      // TODO: logging
-      System.err.println(ex);
+      LOG.error(ex.toString());
       throw new InternalServerErrorResponse();
     }
 
