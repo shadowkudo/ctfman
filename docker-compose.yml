@@ -8,6 +8,9 @@ services:
       target: prod
     ports:
       - "${SERVER_ADDRESS:-127.0.0.1}:${SERVER_PORT:-8080}:80"
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       DB_NAME: "${PG_DB:-ctfman}"
       DB_USER: "${PG_USER:-ctfman}"
@@ -25,6 +28,9 @@ services:
       - ".:/app"
     ports:
       - "${SERVER_ADDRESS:-127.0.0.1}:${SERVER_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       DB_NAME: "${PG_DB:-ctfman}"
       DB_USER: "${PG_USER:-ctfman}"
@@ -47,7 +53,7 @@ services:
     volumes:
       - pgdata:/bitnami/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 1s
       timeout: 5s
       retries: 10
