@@ -2,17 +2,15 @@ package ch.heigvd.dai.commands;
 
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
 import io.javalin.Javalin;
-import static io.javalin.apibuilder.ApiBuilder.get;
-import static io.javalin.apibuilder.ApiBuilder.post;
-import static io.javalin.apibuilder.ApiBuilder.put;
-import static io.javalin.apibuilder.ApiBuilder.delete;
-import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.crud;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.redoc.ReDocPlugin;
@@ -22,6 +20,8 @@ import picocli.CommandLine.Mixin;
 
 @CommandLine.Command(name = "serve", description = "serve the application", scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
 public class App implements Callable<Integer> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
   @Mixin
   private Root.Options root;
@@ -40,6 +40,9 @@ public class App implements Callable<Integer> {
     DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
 
     Javalin app = Javalin.create(config -> {
+      config.jetty.defaultHost = address;
+      config.jetty.defaultPort = port;
+
       config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
 
       }));
@@ -68,11 +71,10 @@ public class App implements Callable<Integer> {
     app.post("/logout", authController::logout);
     app.post("/profile", authController::profile);
 
-    // TODO: create server config to use the address
-    app.start(port);
+    app.start();
 
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      System.out.println("stopping gracefully");
+      LOG.info("stopping gracefully");
       DB.close();
     }));
     return 0;

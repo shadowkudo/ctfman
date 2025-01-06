@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.heigvd.dai.db.DB;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -18,6 +21,8 @@ import picocli.CommandLine.Option;
 
 @Command(name = "setup", description = "setup the database", scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
 public class Setup implements Callable<Integer> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(Setup.class);
 
   @Mixin
   private Root.Options root;
@@ -42,7 +47,7 @@ public class Setup implements Callable<Integer> {
       }
 
     } catch (Exception ex) {
-      System.err.println(ex);
+      LOG.error(ex.toString());
       return -1;
     }
 
@@ -50,7 +55,7 @@ public class Setup implements Callable<Integer> {
   }
 
   private void runScript(Connection conn, String script) throws SQLException, IOException {
-    System.out.println("Executing script: " + script);
+    LOG.info("Executing script: " + script);
 
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(getClass().getClassLoader().getResourceAsStream("sql/" + script)))) {
