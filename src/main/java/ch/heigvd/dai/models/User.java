@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,6 +66,11 @@ public class User extends Authentication {
 
     }
 
+    return null;
+  }
+
+  public static List<User> getAll() {
+    // TODO
     return null;
   }
 
