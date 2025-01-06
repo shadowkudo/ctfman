@@ -1,4 +1,4 @@
-# Compression tool
+# CTFman
 
 <a name="readme-top"></a>
 
@@ -9,7 +9,8 @@
         <a href="#built-with">Built With</a>
     </li>
     <li>
-      <a href="#getting-started">Getting Started</a>
+        <a href="#Introduction">Introduction</a>
+        <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
         <li><a href="#development">Development</a></li>
@@ -27,8 +28,28 @@
 - [Maven][maven]
 - [Docker][docker]
 - [Picocli][picocli]
+- [PostgreSQL][postgresql]
+- [Swagger][swagger]
+- [Javalin][javalin]
+- [Microsoft Azure][azure]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- INTRODUCTION -->
+
+## Introduction
+
+The goal of `CTFman` - a web application using a database - is to efficiently manage Capture The Flag (CTF) competitions. The database will store and organize information about CTFs, participants, teams, tools, and performance metrics. This will allow for:
+
+- Historical Tracking: Preserving records of competitions, which is essential since CTFs are only accessible for a limited time during the event duration.
+- Data Interaction: Providing a seamless interface to visualize, modify, and manage the stored data.
+- Comprehensive Functionality: Enabling functionalities like managing team registrations, tracking user activities, organizing challenges, managing tools and resources, and moderating comments.
+
+> [!NOTE]
+> CTF - Capture The Flag - is a competition where participants solve cybersecurity challenges to gain points and compete against others.
+
+> [!CAUTION]
+> Hacking is not necessarily a negative practice. In fact, it plays an essential role in learning and discovering existing vulnerabilities in computer systems. Through disciplines like CTF (Capture the Flag), cybersecurity enthusiasts can develop skills by identifying potential flaws and understanding how they could be exploited. This knowledge is then used to strengthen system security and prevent future attacks. Thus, ethical hacking or "white hat" hacking actively contributes to the protection of digital infrastructures by anticipating risks and proposing solutions.
 
 <!-- GETTING STARTED -->
 
@@ -135,3 +156,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [docker]: https://www.docker.com/
 [picocli]: https://picocli.info/
 [asdf]: https://asdf-vm.com/
+[postgresql]: https://www.postgresql.org/ 
+[swagger]: https://swagger.io/
+[javalin]: https://javalin.io/
+[azure]: https://azure.microsoft.com/en-us/explore
