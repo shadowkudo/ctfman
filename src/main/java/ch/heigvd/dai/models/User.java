@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
@@ -69,8 +70,17 @@ public class User extends Authentication {
     return null;
   }
 
-  public static List<User> getAll() {
-    // TODO
+  public static List<User> getAll(Role role) throws SQLException {
+    List<User> list = new ArrayList<>();
+    String query;
+
+    if (role == null) {
+      query ="SELECT DISTINCT * FROM user_account ua WHERE ua.";
+    }
+
+    try (Connection conn = DB.getConnection()) {
+
+    }
     return null;
   }
 

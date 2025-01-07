@@ -5,21 +5,32 @@ import io.javalin.apibuilder.CrudHandler;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.MethodNotAllowedResponse;
-import io.javalin.openapi.HttpMethod;
-import io.javalin.openapi.OpenApi;
-import io.javalin.openapi.OpenApiContent;
-import io.javalin.openapi.OpenApiResponse;
+import io.javalin.openapi.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UsersController implements CrudHandler {
 
-    @OpenApi(path = "/users", methods = HttpMethod.GET, summary = "get all users", operationId = "getAllUsers", tags = {
-            "User" }, responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User[].class) })
-    })
-    public void getAll(Context ctx) { throw new MethodNotAllowedResponse(); }
+    @OpenApi(path = "/users",
+            methods = HttpMethod.GET,
+            summary = "get all users",
+            operationId = "getAllUsers",
+            tags = { "User" },
+            requestBody =
+            @OpenApiRequestBody(
+                    required = false,
+                    content = {@OpenApiContent(from = User.Role.class, type = ContentType.JSON)}),
+            responses = {
+                @OpenApiResponse(status = "200",
+                                 content = { @OpenApiContent(from = User[].class) })
+            }
+    )
+    public void getAll(Context ctx) {
+        List<User> users = User.getAll();
+        throw new MethodNotAllowedResponse();
+    }
 
     @OpenApi(path = "/users", methods = HttpMethod.POST, summary = "create a user", operationId = "createUser",
             tags = { "User" })

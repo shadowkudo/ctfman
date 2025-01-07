@@ -4,6 +4,7 @@ import java.util.concurrent.Callable;
 
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
+import ch.heigvd.dai.controllers.UsersController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
@@ -49,6 +50,10 @@ public class App implements Callable<Integer> {
       config.router.apiBuilder(() -> {
         crud("/teams/{id}", new TeamsController());
       });
+      config.router.apiBuilder(() -> {
+        crud("/users/{id}", new UsersController());
+      });
+
     });
 
     // Global middlewares
@@ -57,6 +62,9 @@ public class App implements Callable<Integer> {
     // Requires the user to be connected before accessing this endpoint
     app.before("/teams", new AuthMiddleware());
     app.before("/teams/*", new AuthMiddleware());
+    app.before("/users", new AuthMiddleware());
+    app.before("/users/*", new AuthMiddleware());
+
 
     // Controllers
     AuthController authController = new AuthController();
@@ -67,6 +75,9 @@ public class App implements Callable<Integer> {
     app.post("/login", authController::login);
     app.post("/logout", authController::logout);
     app.post("/profile", authController::profile);
+
+    // User interaction
+
 
     // TODO: create server config to use the address
     app.start(port);
