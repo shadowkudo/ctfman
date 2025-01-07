@@ -179,4 +179,19 @@ FROM user_account ua
   LEFT JOIN moderator mod ON mod.manager = man.user_account
   LEFT JOIN author aut ON aut.manager = man.user_account;
 
+DROP VIEW IF EXISTS team_with_captain_view;
+CREATE VIEW team_with_captain_view AS
+SELECT
+  authentication,
+  description,
+  country,
+  created_at,
+  deleted_at,
+  challenger captain,
+  password_hash
+FROM team
+  JOIN authentication a ON team.authentication = a.identification
+  JOIN challenger_in_team cit ON cit.team = team.authentication
+WHERE cit.is_captain;
+
 COMMIT;

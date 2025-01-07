@@ -10,30 +10,32 @@ import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Team extends Authentication {
 
-  private static final Logger LOG = LoggerFactory.getLogger(Team.class);
-
   private String authentication;
+  private String oldAuthentication;
   private String description;
   private String country;
+  private String captain;
 
   public Team() {
     super();
   }
 
   public Team(
-      @NotNull String authentication, @Nullable String description, @Nullable String country) {
-    this(authentication, description, country, null, null, null);
+      @NotNull String authentication,
+      @Nullable String description,
+      @Nullable String country,
+      @Nullable String captain) {
+    this(authentication, description, country, captain, null, null, null);
   }
 
   public Team(
       @NotNull String authentication,
       @Nullable String description,
       @Nullable String country,
+      @Nullable String captain,
       @Nullable String passwordHash,
       @Nullable Timestamp createdAt,
       @Nullable Timestamp deletedAt) {
@@ -41,6 +43,8 @@ public class Team extends Authentication {
     this.authentication = authentication;
     this.description = description;
     this.country = country;
+    this.captain = captain;
+    this.oldAuthentication = authentication;
   }
 
   public String getAuthentication() {
@@ -67,11 +71,28 @@ public class Team extends Authentication {
     this.country = country;
   }
 
+  public String getCaptain() {
+    return captain;
+  }
+
+  public void setCaptain(String captain) {
+    this.captain = captain;
+  }
+
   public static List<Team> getAll() throws SQLException {
+    return getAll(true);
+  }
+
+  public static List<Team> getAll(boolean ignoreDeleted) throws SQLException {
     List<Team> teams = new ArrayList<>();
     String query =
         "SELECT authentication, description, country, created_at, deleted_at FROM team JOIN"
             + " authentication a ON team.authentication = a.identification";
+
+    if (ignoreDeleted) {
+      query = query + " AND deleted_at IS NULL";
+    }
+
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
       ResultSet res = stmt.executeQuery();
@@ -83,6 +104,7 @@ public class Team extends Authentication {
                 res.getString("description"),
                 res.getString("country"),
                 null,
+                null,
                 res.getTimestamp("created_at"),
                 res.getTimestamp("deleted_at")));
       }
@@ -92,10 +114,15 @@ public class Team extends Authentication {
   }
 
   public static @Nullable Team getByName(String name) throws SQLException {
-    String query =
-        "SELECT authentication, description, country, created_at, deleted_at FROM team JOIN"
-            + " authentication a ON team.authentication = a.identification WHERE authentication ="
-            + " ?";
+    return getByName(name, true);
+  }
+
+  public static @Nullable Team getByName(String name, boolean ignoreDeleted) throws SQLException {
+    String query = "SELECT * FROM team_with_captain_view WHERE authentication = ?";
+
+    if (ignoreDeleted) {
+      query = query + " AND deleted_at IS NULL";
+    }
 
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
@@ -110,13 +137,14 @@ public class Team extends Authentication {
           res.getString("authentication"),
           res.getString("description"),
           res.getString("country"),
-          null,
+          res.getString("captain"),
+          res.getString("password_hash"),
           res.getTimestamp("created_at"),
           res.getTimestamp("deleted_at"));
     }
   }
 
-  public void insertWithCaptain(User user) throws SQLException {
+  public void insert() throws SQLException {
     // create_team(authentication, password_hash, captain, description, country)
     String query = "CALL create_team(?, ?, ?, ?, ?)";
 
@@ -124,11 +152,59 @@ public class Team extends Authentication {
       PreparedStatement stmt = conn.prepareStatement(query);
       stmt.setString(1, this.authentication);
       stmt.setString(2, this.passwordHash);
-      stmt.setString(3, user.getAuthentication());
+      stmt.setString(3, this.captain);
       stmt.setString(4, this.description);
       stmt.setString(5, this.country);
 
       stmt.executeUpdate();
     }
+  }
+
+  public boolean update() throws SQLException {
+    String updateTeam = "UPDATE team SET description = ?, country = ? WHERE authentication = ?";
+    String updateAuth = "UPDATE authentication SET identification = ? WHERE identification = ?";
+
+    try (Connection conn = DB.getConnection()) {
+      conn.setAutoCommit(false);
+
+      PreparedStatement stmt = conn.prepareStatement(updateTeam);
+      stmt.setString(1, this.description);
+      stmt.setString(2, this.country);
+      stmt.setString(3, this.oldAuthentication);
+
+      if (stmt.executeUpdate() != 1) {
+        conn.rollback();
+        return false;
+      }
+
+      stmt = conn.prepareStatement(updateAuth);
+      stmt.setString(1, this.authentication);
+      stmt.setString(2, this.oldAuthentication);
+
+      if (stmt.executeUpdate() != 1) {
+        conn.rollback();
+        return false;
+      }
+
+      conn.commit();
+    }
+
+    return true;
+  }
+
+  public boolean delete() throws SQLException {
+
+    String query = "UPDATE authentication SET deleted_at = NOW() WHERE identification = ?";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, oldAuthentication);
+
+      if (stmt.executeUpdate() != 1) {
+        return false;
+      }
+    }
+
+    return true;
   }
 }
