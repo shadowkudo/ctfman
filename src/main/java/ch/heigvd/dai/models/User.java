@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.javalin.http.NotFoundResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -72,16 +73,38 @@ public class User extends Authentication {
 
   public static List<User> getAll(Role role) throws SQLException {
     List<User> list = new ArrayList<>();
-    String query;
+    /* Create the query to get the role asked */
+    String query = switch (role) {
+        case ADMIN -> "SELECT au.identification " +
+                " FROM admin a " +
+                " JOIN authentication au ON a.manager = au.identification " +
+                " WHERE au.deleted_at IS NULL;";
+        case MODERATOR -> "SELECT au.identification " +
+                " FROM moderator m " +
+                " JOIN authentication au ON m.manager = au.identification " +
+                " WHERE au.deleted_at IS NULL;";
+        case AUTHOR -> "SELECT au.identification " +
+                " FROM author a " +
+                " JOIN authentication au ON a.manager = au.identification " +
+                " WHERE au.deleted_at IS NULL;";
+        case CHALLENGER -> "SELECT au.identification " +
+                " FROM challenger ch " +
+                " JOIN authentication au ON ch.user_account = au.identification " +
+                " WHERE au.deleted_at IS NULL;";
+        case ALL -> "SELECT au.identification" +
+                " FROM user_account ua" +
+                " JOIN authentication au ON au.identification = ua.authentication" +
+                " WHERE au.deleted_at IS NULL;";
+        default -> throw new NotFoundResponse();
+    };
 
-    if (role == null) {
-      query ="SELECT DISTINCT * FROM user_account ua WHERE ua.";
+      try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      ResultSet res = stmt.executeQuery();
+
+        while (res.next()) list.add(findByName(res.getString("identification")));
     }
-
-    try (Connection conn = DB.getConnection()) {
-
-    }
-    return null;
+    return list;
   }
 
   public String getAuthentication() {
@@ -138,11 +161,12 @@ public class User extends Authentication {
       case AUTHOR -> isAuthor;
       case CHALLENGER -> isChallenger;
       case MODERATOR -> isModerator;
+      case ALL -> isChallenger;
     };
   }
 
   public static enum Role {
-    CHALLENGER, ADMIN, MODERATOR, AUTHOR
+    CHALLENGER, ADMIN, MODERATOR, AUTHOR, ALL
   }
 
 }

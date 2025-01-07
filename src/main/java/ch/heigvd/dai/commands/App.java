@@ -71,13 +71,22 @@ public class App implements Callable<Integer> {
                         });
                   });
                 config.router.apiBuilder(
+                  () -> {
+                    path(
+                         "/users/{id}",
+                         () -> {
+                           UsersController usersController = new UsersController();
+                           crud(usersController);
+                         });
+                  });
+                config.router.apiBuilder(
                         () -> {
                             path(
-                                    "/users/{userName}",
-                                    () -> {
-                                        UsersController usersController = new UsersController();
-                                        crud(usersController);
-                                    });
+                                 "/groups/{roles}",
+                                 () -> {
+                                   UsersController usersController = new UsersController();
+                                   crud(usersController);
+                                 });
                         });
             });
 
