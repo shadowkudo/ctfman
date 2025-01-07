@@ -25,20 +25,17 @@ public class Setup implements Callable<Integer> {
   private static final Logger LOG = LoggerFactory.getLogger(Setup.class);
 
   @Mixin
-  private Root.Options root;
-
-  @Option(names = "--seed", description = "fill the database with dummy data", defaultValue = "false")
-  private boolean seed;
+  private Options options;
 
   @Override
   public Integer call() throws Exception {
-    DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
+    DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
     try (Connection conn = DB.getConnection()) {
       ArrayList<String> scripts = new ArrayList<>(
           Arrays.asList("01_create_tables.sql", "02_triggers.sql", "04_views.sql"));
 
-      if (seed) {
+      if (options.seed) {
         scripts.add("03_populate.sql");
       }
 
@@ -64,6 +61,11 @@ public class Setup implements Callable<Integer> {
       conn.createStatement().execute(sql);
 
     }
+  }
+
+  public static class Options extends Root.Options {
+    @Option(names = "--seed", description = "fill the database with dummy data (default: ${DEFAULT-VALUE})", defaultValue = "false")
+    private boolean seed;
   }
 
 }
