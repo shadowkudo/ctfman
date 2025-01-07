@@ -6,6 +6,7 @@ import static io.javalin.apibuilder.ApiBuilder.put;
 
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
+import ch.heigvd.dai.controllers.UsersController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
@@ -69,6 +70,15 @@ public class App implements Callable<Integer> {
                           put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
                         });
                   });
+                config.router.apiBuilder(
+                        () -> {
+                            path(
+                                    "/users/{userName}",
+                                    () -> {
+                                        UsersController usersController = new UsersController();
+                                        crud(usersController);
+                                    });
+                        });
             });
 
     // Global middlewares
@@ -77,6 +87,8 @@ public class App implements Callable<Integer> {
     // Requires the user to be connected before accessing this endpoint
     app.before("/teams", new AuthMiddleware());
     app.before("/teams/*", new AuthMiddleware());
+    app.before("/users", new AuthMiddleware());
+    app.before("/users/*", new AuthMiddleware());
 
     // Controllers
     AuthController authController = new AuthController();
