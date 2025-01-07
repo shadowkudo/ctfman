@@ -162,4 +162,36 @@ ON c.challenge = ch.title
 LEFT JOIN comment parent_comment
     ON c.parent = parent_comment.id;
 
+DROP VIEW IF EXISTS user_role_view;
+CREATE VIEW user_role_view AS
+SELECT
+  auth.*,
+  ua.*,
+  CASE WHEN chal.user_account IS NOT NULL THEN TRUE ELSE FALSE END is_challenger,
+  CASE WHEN admin.manager IS NOT NULL THEN TRUE ELSE FALSE END is_admin,
+  CASE WHEN mod.manager IS NOT NULL THEN TRUE ELSE FALSE END is_moderator,
+  CASE WHEN aut.manager IS NOT NULL THEN TRUE ELSE FALSE END is_author
+FROM user_account ua
+  JOIN authentication auth ON auth.identification = ua.authentication
+  LEFT JOIN manager man ON man.user_account = ua.authentication
+  LEFT JOIN challenger chal ON chal.user_account = ua.authentication
+  LEFT JOIN admin ON admin.manager = man.user_account
+  LEFT JOIN moderator mod ON mod.manager = man.user_account
+  LEFT JOIN author aut ON aut.manager = man.user_account;
+
+DROP VIEW IF EXISTS team_with_captain_view;
+CREATE VIEW team_with_captain_view AS
+SELECT
+  authentication,
+  description,
+  country,
+  created_at,
+  deleted_at,
+  challenger captain,
+  password_hash
+FROM team
+  JOIN authentication a ON team.authentication = a.identification
+  JOIN challenger_in_team cit ON cit.team = team.authentication
+WHERE cit.is_captain;
+
 COMMIT;

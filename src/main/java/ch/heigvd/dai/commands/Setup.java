@@ -10,6 +10,9 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ch.heigvd.dai.db.DB;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -19,21 +22,20 @@ import picocli.CommandLine.Option;
 @Command(name = "setup", description = "setup the database", scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
 public class Setup implements Callable<Integer> {
 
-  @Mixin
-  private Root.Options root;
+  private static final Logger LOG = LoggerFactory.getLogger(Setup.class);
 
-  @Option(names = "--seed", description = "fill the database with dummy data", defaultValue = "false")
-  private boolean seed;
+  @Mixin
+  private Options options;
 
   @Override
   public Integer call() throws Exception {
-    DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
+    DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
     try (Connection conn = DB.getConnection()) {
       ArrayList<String> scripts = new ArrayList<>(
           Arrays.asList("01_create_tables.sql", "02_triggers.sql", "04_views.sql"));
 
-      if (seed) {
+      if (options.seed) {
         scripts.add("03_populate.sql");
       }
 
@@ -42,7 +44,7 @@ public class Setup implements Callable<Integer> {
       }
 
     } catch (Exception ex) {
-      System.err.println(ex);
+      LOG.error(ex.toString());
       return -1;
     }
 
@@ -50,7 +52,7 @@ public class Setup implements Callable<Integer> {
   }
 
   private void runScript(Connection conn, String script) throws SQLException, IOException {
-    System.out.println("Executing script: " + script);
+    LOG.info("Executing script: " + script);
 
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(getClass().getClassLoader().getResourceAsStream("sql/" + script)))) {
@@ -59,6 +61,11 @@ public class Setup implements Callable<Integer> {
       conn.createStatement().execute(sql);
 
     }
+  }
+
+  public static class Options extends Root.Options {
+    @Option(names = "--seed", description = "fill the database with dummy data (default: ${DEFAULT-VALUE})", defaultValue = "false")
+    private boolean seed;
   }
 
 }

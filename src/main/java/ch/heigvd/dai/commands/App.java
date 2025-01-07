@@ -1,60 +1,75 @@
 package ch.heigvd.dai.commands;
 
-import java.util.concurrent.Callable;
+import static io.javalin.apibuilder.ApiBuilder.crud;
+import static io.javalin.apibuilder.ApiBuilder.path;
+import static io.javalin.apibuilder.ApiBuilder.put;
 
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.TeamsController;
-import ch.heigvd.dai.controllers.UsersController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.javalin.Javalin;
-import static io.javalin.apibuilder.ApiBuilder.get;
-import static io.javalin.apibuilder.ApiBuilder.post;
-import static io.javalin.apibuilder.ApiBuilder.put;
-import static io.javalin.apibuilder.ApiBuilder.delete;
-import static io.javalin.apibuilder.ApiBuilder.path;
-import static io.javalin.apibuilder.ApiBuilder.crud;
+import io.javalin.json.JavalinJackson;
 import io.javalin.openapi.plugin.OpenApiPlugin;
 import io.javalin.openapi.plugin.redoc.ReDocPlugin;
 import io.javalin.openapi.plugin.swagger.SwaggerPlugin;
+import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import picocli.CommandLine;
 import picocli.CommandLine.Mixin;
 
-@CommandLine.Command(name = "serve", description = "serve the application", scope = CommandLine.ScopeType.INHERIT, mixinStandardHelpOptions = true)
+@CommandLine.Command(
+    name = "serve",
+    description = "serve the application",
+    scope = CommandLine.ScopeType.INHERIT,
+    mixinStandardHelpOptions = true)
 public class App implements Callable<Integer> {
 
-  @Mixin
-  private Root.Options root;
+  private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
-  @CommandLine.Option(names = { "-a",
-      "--address" }, description = "The address to listen on", defaultValue = "${SERVER_ADDRESS:-0.0.0.0}")
-  private String address;
-
-  @CommandLine.Option(names = { "-p",
-      "--port" }, description = "The port to listen on", defaultValue = "${SERVER_PORT:-8080}")
-  private int port;
+  @Mixin private Options options;
 
   @Override
   public Integer call() throws Exception {
 
-    DB.configure(root.dbUrl, root.dbUser, root.dbPassword);
+    DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
-    Javalin app = Javalin.create(config -> {
-      config.registerPlugin(new OpenApiPlugin(pluginConfig -> {
+    Javalin app =
+        Javalin.create(
+            config -> {
+              config.jetty.defaultHost = options.address;
+              config.jetty.defaultPort = options.port;
+              config.jsonMapper(
+                  new JavalinJackson()
+                      .updateMapper(
+                          mapper -> {
+                            // NOTE: this behaviour is really weird but that's the only way to have
+                            // the expected behaviour. sending { "value": null } will result in the
+                            // actual value being Optional.empty() while sending { } will make value
+                            // == null. This is backward but we can't just inverse it through
+                            // configuration so this will have to do
+                            mapper.registerModule(new Jdk8Module().configureReadAbsentAsNull(true));
+                          }));
 
-      }));
-      config.registerPlugin(new SwaggerPlugin());
-      config.registerPlugin(new ReDocPlugin());
+              config.registerPlugin(new OpenApiPlugin(pluginConfig -> {}));
 
-      config.router.apiBuilder(() -> {
-        crud("/teams/{id}", new TeamsController());
-      });
-      config.router.apiBuilder(() -> {
-        crud("/users/{id}", new UsersController());
-      });
+              config.registerPlugin(new SwaggerPlugin());
+              config.registerPlugin(new ReDocPlugin());
 
-    });
+              config.router.apiBuilder(
+                  () -> {
+                    path(
+                        "/teams/{teamName}",
+                        () -> {
+                          TeamsController teamsController = new TeamsController();
+                          crud(teamsController);
+                          put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
+                        });
+                  });
+            });
 
     // Global middlewares
     app.before(new SessionMiddleware());
@@ -62,9 +77,6 @@ public class App implements Callable<Integer> {
     // Requires the user to be connected before accessing this endpoint
     app.before("/teams", new AuthMiddleware());
     app.before("/teams/*", new AuthMiddleware());
-    app.before("/users", new AuthMiddleware());
-    app.before("/users/*", new AuthMiddleware());
-
 
     // Controllers
     AuthController authController = new AuthController();
@@ -76,16 +88,29 @@ public class App implements Callable<Integer> {
     app.post("/logout", authController::logout);
     app.post("/profile", authController::profile);
 
-    // User interaction
+    app.start();
 
-
-    // TODO: create server config to use the address
-    app.start(port);
-
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      System.out.println("stopping gracefully");
-      DB.close();
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  LOG.info("stopping gracefully");
+                  DB.close();
+                }));
     return 0;
+  }
+
+  public static class Options extends Root.Options {
+    @CommandLine.Option(
+        names = {"-a", "--address"},
+        description = "The address to listen on (default: ${DEFAULT-VALUE})",
+        defaultValue = "${SERVER_ADDRESS:-0.0.0.0}")
+    private String address;
+
+    @CommandLine.Option(
+        names = {"-p", "--port"},
+        description = "The port to listen on (default: ${DEFAULT-VALUE})",
+        defaultValue = "${SERVER_PORT:-8080}")
+    private int port;
   }
 }
