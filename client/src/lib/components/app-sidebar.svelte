@@ -21,18 +21,23 @@
 
 	const sidebar = useSidebar();
 
-	const navMain = new NavBuilder()
-		.add('Home', '/', (home) => home.setIcon(HomeIcon))
-		.addIf(user != null, 'Teams', '/teams', (team) => {
-			team
-				.setIcon(UsersIcon)
-				.add('List', '/teams')
-				.addIf(user?.role.challenger, 'Create', '/teams/create');
-		})
-		.addIf(user != null, 'CTFs', '/ctfs', (ctf) => {
-			ctf.setIcon(FlagIcon).add('List', '/ctfs').addIf(user?.role.admin, 'Create', '/ctfs/create');
-		})
-		.get();
+	const navMain = $derived(
+		new NavBuilder()
+			.add('Home', '/', (home) => home.setIcon(HomeIcon))
+			.addIf(user != null, 'Teams', '/teams', (team) => {
+				team
+					.setIcon(UsersIcon)
+					.add('List', '/teams')
+					.addIf(user?.role.challenger, 'Create', '/teams/create');
+			})
+			.addIf(user != null, 'CTFs', '/ctfs', (ctf) => {
+				ctf
+					.setIcon(FlagIcon)
+					.add('List', '/ctfs')
+					.addIf(user?.role.admin, 'Create', '/ctfs/create');
+			})
+			.get()
+	);
 
 	// TODO: remove teams here
 	const teams = [
