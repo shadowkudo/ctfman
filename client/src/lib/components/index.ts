@@ -1,2 +1,3 @@
 import Base from './base.svelte';
-export { Base };
+import AppSidebar from './app-sidebar.svelte';
+export { Base, AppSidebar };

@@ -21,24 +21,24 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 	};
 };
 
-async function fetchUser(fetch: PageFetch): Promise<User | null> {
+async function fetchUser(fetch: PageFetch): Promise<User | undefined> {
 	let res = await fetch(`${PUBLIC_BACKEND_URL}/profile`);
 
 	// User isn't logged in
 	if (res.status == 401) {
-		return null;
+		return undefined;
 	}
 
 	if (res.status != 200) {
 		console.error(`Unexpected status code when fetching profile: ${res.status}`);
-		return null;
+		return undefined;
 	}
 
 	const json = await res.json();
 
 	if (json?.authentication == null) {
 		console.error(`User missing authentication field in response: ${json}`);
-		return null;
+		return undefined;
 	}
 
 	return {
