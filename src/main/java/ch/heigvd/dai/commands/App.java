@@ -9,6 +9,7 @@ import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.javalin.Javalin;
 import io.javalin.json.JavalinJackson;
@@ -51,8 +52,16 @@ public class App implements Callable<Integer> {
                             // actual value being Optional.empty() while sending { } will make value
                             // == null. This is backward but we can't just inverse it through
                             // configuration so this will have to do
-                            mapper.registerModule(new Jdk8Module().configureReadAbsentAsNull(true));
+                            mapper
+                                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                                .registerModule(new Jdk8Module().configureReadAbsentAsNull(true));
                           }));
+
+              config.bundledPlugins.enableCors(
+                  cors -> {
+                    // TODO: actually configure cors
+                    cors.addRule(it -> it.anyHost());
+                  });
 
               config.registerPlugin(new OpenApiPlugin(pluginConfig -> {}));
 
@@ -86,7 +95,7 @@ public class App implements Callable<Integer> {
     // Auth routes
     app.post("/login", authController::login);
     app.post("/logout", authController::logout);
-    app.post("/profile", authController::profile);
+    app.get("/profile", authController::profile);
 
     app.start();
 

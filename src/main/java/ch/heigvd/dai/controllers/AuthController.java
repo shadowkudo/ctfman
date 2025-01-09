@@ -118,13 +118,13 @@ public class AuthController {
 
   @OpenApi(
       path = "/profile",
-      methods = HttpMethod.POST,
+      methods = HttpMethod.GET,
       summary = "get profile",
       operationId = "profile",
       tags = {"Auth"},
       responses = {
         @OpenApiResponse(
-            status = "204",
+            status = "200",
             description = "Profile details",
             content = {@OpenApiContent(from = User.class)})
       })
