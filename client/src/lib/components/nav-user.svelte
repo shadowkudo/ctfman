@@ -24,7 +24,7 @@
 		}
 
 		await invalidateAll();
-		redirect(301, '/');
+		redirect(307, '/');
 	}
 
 	let { user }: Props = $props();
