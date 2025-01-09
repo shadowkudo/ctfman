@@ -7,19 +7,24 @@
 	import type { User } from '../../routes/+layout';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import { invalidateAll } from '$app/navigation';
+	import { redirect } from '@sveltejs/kit';
 
 	interface Props {
 		user: User;
 	}
 
 	async function logOut() {
-		let res = await fetch(`${PUBLIC_BACKEND_URL}/logout`, { method: 'POST' });
+		let res = await fetch(`${PUBLIC_BACKEND_URL}/logout`, {
+			method: 'POST',
+			credentials: 'include'
+		});
 
 		if (res.status != 204) {
 			console.error(`logout: unexpected response status : ${res.status}`);
 		}
 
 		await invalidateAll();
+		redirect(301, '/');
 	}
 
 	let { user }: Props = $props();

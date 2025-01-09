@@ -22,7 +22,7 @@ export const load: LayoutLoad = async ({ fetch, url }) => {
 };
 
 async function fetchUser(fetch: PageFetch): Promise<User | undefined> {
-	let res = await fetch(`${PUBLIC_BACKEND_URL}/profile`);
+	let res = await fetch(`${PUBLIC_BACKEND_URL}/profile`, { credentials: 'include' });
 
 	// User isn't logged in
 	if (res.status == 401) {
