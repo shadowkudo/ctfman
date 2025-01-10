@@ -1,16 +1,8 @@
 import type { LayoutLoad } from './$types';
 import type { PageFetch } from '$lib/data';
+import type { Team } from '.';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { error } from '@sveltejs/kit';
-
-interface Team {
-	name: string;
-	description?: string;
-	country?: string;
-	captain?: string;
-	createdAt?: Date;
-	deletedAt?: Date;
-}
 
 export const load: LayoutLoad = async ({ fetch, params }) => {
 	if (!params.team) {

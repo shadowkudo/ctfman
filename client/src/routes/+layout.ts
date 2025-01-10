@@ -1,19 +1,7 @@
 import type { LayoutLoad } from './$types';
 import type { PageFetch } from '$lib/data';
+import type { User } from '.';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-
-export interface User {
-	name: string;
-	email?: string;
-	role: {
-		challenger?: boolean;
-		admin?: boolean;
-		moderator?: boolean;
-		author?: boolean;
-	};
-	createdAt?: Date;
-	deletedAt?: Date;
-}
 
 export const load: LayoutLoad = async ({ fetch }) => {
 	return {
