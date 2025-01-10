@@ -2,23 +2,17 @@ import type { LayoutLoad } from './$types';
 import type { PageFetch } from '$lib/data';
 import type { Team } from '.';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import { error } from '@sveltejs/kit';
+import { useError } from '$lib/utils';
 
 export const load: LayoutLoad = async ({ fetch, params }) => {
 	if (!params.team) {
-		error(404, {
-			message: 'Not found',
-			subtext: 'Sorry, we couldn’t find the page you’re looking for.'
-		});
+		useError(404);
 	}
 
 	let team: Team | null = await fetchTeam(fetch, params.team);
 
 	if (!team) {
-		error(404, {
-			message: 'Not found',
-			subtext: 'Sorry, we couldn’t find the page you’re looking for.'
-		});
+		useError(404);
 	}
 
 	return {

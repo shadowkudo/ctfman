@@ -7,6 +7,10 @@
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Select from '$lib/components/ui/select';
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
+	import { useError } from '$lib/utils';
+	import { error } from '@sveltejs/kit';
+	import { toast } from 'svelte-sonner';
+
 	interface CreateForm {
 		name: string;
 		password: string;
@@ -30,15 +34,22 @@
 			credentials: 'include'
 		});
 
-		if (res.status == 401) {
-			return;
+		switch (res.status) {
+			case 201:
+				break;
+			case 401:
+				useError(401);
+			case 409:
+				toast.error('Error while creating team', {
+					description: 'A team already exists with this name'
+				});
+				return;
+			default:
+				console.error(`login: unexpected response status: ${res.status}`);
+				return;
 		}
 
-		if (res.status != 201) {
-			console.error(`login: unexpected response status: ${res.status}`);
-			return;
-		}
-
+		toast.success('success', { description: 'redirecting to the new team' });
 		goto(`/teams/${form.name}`);
 	}
 

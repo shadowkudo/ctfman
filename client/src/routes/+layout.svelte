@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
+	import { ModeWatcher } from 'mode-watcher';
+	import { Toaster } from '$lib/components/ui/sonner';
 	import '../app.css';
 	import { page } from '$app/state';
 
@@ -8,10 +10,6 @@
 	import * as Sidebar from '$lib/components/ui/sidebar';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import Separator from '$lib/components/ui/separator/separator.svelte';
-
-	import { Base } from '$lib/components';
-	import { cn } from '$lib/utils';
-	import { BellIcon, HomeIcon, LandPlotIcon, MenuIcon, SearchIcon, UsersIcon } from 'lucide-svelte';
 
 	interface Props {
 		data: LayoutData;
@@ -21,6 +19,10 @@
 	let { children, data }: Props = $props();
 </script>
 
+<!-- mode watcher used to make sonner light mode until a dark theme is provided for the whole app -->
+<ModeWatcher track={false} defaultMode="light" />
+<!-- sonner for notifications -->
+<Toaster />
 <Sidebar.Provider>
 	<AppSidebar user={data.user} />
 	<Sidebar.Inset>
