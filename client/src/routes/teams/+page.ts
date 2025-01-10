@@ -1,7 +1,6 @@
 import type { PageLoad } from './$types';
 import type { PageFetch } from '$lib/data';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import { redirect } from '@sveltejs/kit';
 
 interface Team {
 	name: string;
@@ -12,7 +11,7 @@ interface Team {
 	deletedAt?: Date;
 }
 
-export const load: PageLoad = async ({ fetch, url }) => {
+export const load: PageLoad = async ({ fetch }) => {
 	return {
 		teams: await fetchUser(fetch)
 	};

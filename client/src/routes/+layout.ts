@@ -15,9 +15,7 @@ export interface User {
 	deletedAt?: Date;
 }
 
-export const prerender = true;
-
-export const load: LayoutLoad = async ({ fetch, url }) => {
+export const load: LayoutLoad = async ({ fetch }) => {
 	return {
 		user: await fetchUser(fetch)
 	};

@@ -1,7 +1,7 @@
-import type { PageLoad } from './$types';
+import type { LayoutLoad } from './$types';
 import type { PageFetch } from '$lib/data';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 
 interface Team {
 	name: string;
@@ -12,7 +12,11 @@ interface Team {
 	deletedAt?: Date;
 }
 
-export const load: PageLoad = async ({ fetch, params }) => {
+export const load: LayoutLoad = async ({ fetch, params }) => {
+	if (!params.team) {
+		error(404, 'Not found');
+	}
+
 	let team: Team | null = await fetchTeam(fetch, params.team);
 
 	if (!team) {

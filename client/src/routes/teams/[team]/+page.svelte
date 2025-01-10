@@ -6,8 +6,6 @@
 	}
 
 	let { data }: Props = $props();
-
-	console.log(data);
 </script>
 
 <p>welcome to {data.team.name}</p>
