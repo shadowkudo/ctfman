@@ -75,9 +75,7 @@
 		{/if}
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		{#if user}
-			<NavUser {user} />
-		{/if}
+		<NavUser {user} />
 	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>

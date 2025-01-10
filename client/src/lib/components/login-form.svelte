@@ -5,6 +5,7 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
+	import { redirect } from '@sveltejs/kit';
 
 	let form = $state({
 		username: '',
@@ -33,7 +34,8 @@
 			return;
 		}
 
-		invalidateAll();
+		await invalidateAll();
+		redirect(307, '/');
 	}
 </script>
 

@@ -4,10 +4,5 @@ import type { PageLoad } from './$types';
 export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const { user } = await parent();
 
-	// Automatically redirect the user to login if not logged in
-	if (user == null) {
-		redirect(307, '/login');
-	}
-
 	return {};
 };

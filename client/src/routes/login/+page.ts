@@ -5,7 +5,7 @@ export const load: PageLoad = async ({ fetch, url, parent }) => {
 	const { user } = await parent();
 
 	// Automatically redirect the user to login if not logged in
-	if (user != null) {
+	if (user) {
 		redirect(307, '/');
 	}
 
