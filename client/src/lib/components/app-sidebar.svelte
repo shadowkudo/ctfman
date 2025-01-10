@@ -28,13 +28,10 @@
 				team
 					.setIcon(UsersIcon)
 					.add('List', '/teams')
-					.addIf(user?.role.challenger, 'Create', '/teams/create');
+					.addIf(user?.role.challenger, 'Create', '/team/create');
 			})
 			.addIf(user != null, 'CTFs', '/ctfs', (ctf) => {
-				ctf
-					.setIcon(FlagIcon)
-					.add('List', '/ctfs')
-					.addIf(user?.role.admin, 'Create', '/ctfs/create');
+				ctf.setIcon(FlagIcon).add('List', '/ctfs').addIf(user?.role.admin, 'Create', '/ctf/create');
 			})
 			.get()
 	);

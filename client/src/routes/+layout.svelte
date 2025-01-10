@@ -40,40 +40,47 @@
 						{/if}
 
 						<!-- /teams/* -->
-						{#if page.route.id?.startsWith('/teams')}
+						{#if page.route.id?.startsWith('/team')}
 							<Breadcrumb.Item class="hidden md:block">
 								<Breadcrumb.Link href="/teams">teams</Breadcrumb.Link>
 							</Breadcrumb.Item>
-						{/if}
-						{#if page.route.id?.startsWith('/teams/create')}
-							<Breadcrumb.Separator class="hidden md:block" />
-							<Breadcrumb.Item>
-								<Breadcrumb.Page>create</Breadcrumb.Page>
-							</Breadcrumb.Item>
-						{/if}
-						{#if page.route.id?.startsWith('/teams/t/[]')}
-							<Breadcrumb.Separator class="hidden md:block" />
-							<Breadcrumb.Item>
-								<Breadcrumb.Page>[]</Breadcrumb.Page>
-							</Breadcrumb.Item>
+							{#if page.route.id?.startsWith('/teams/[team]')}
+								<Breadcrumb.Separator class="hidden md:block" />
+								<Breadcrumb.Item>
+									{#if page.route.id == '/teams/[team]'}
+										<Breadcrumb.Page>{page.params?.team}</Breadcrumb.Page>
+									{:else}
+										<Breadcrumb.Link href={`/teams/${page.params?.team}`}>
+											{page.params?.team}
+										</Breadcrumb.Link>
+									{/if}
+								</Breadcrumb.Item>
+							{/if}
 						{/if}
 
 						<!-- /ctfs/* -->
-						{#if page.route.id?.startsWith('/ctfs')}
+						{#if page.route.id?.startsWith('/ctf')}
 							<Breadcrumb.Item class="hidden md:block">
 								<Breadcrumb.Link href="/ctfs">ctfs</Breadcrumb.Link>
 							</Breadcrumb.Item>
+							{#if page.route.id?.startsWith('/ctfs/[ctf]')}
+								<Breadcrumb.Separator class="hidden md:block" />
+								<Breadcrumb.Item>
+									<Breadcrumb.Page>[]</Breadcrumb.Page>
+								</Breadcrumb.Item>
+							{/if}
 						{/if}
-						{#if page.route.id?.startsWith('/ctfs/create')}
+
+						<!-- **/edit|create -->
+						{#if page.route.id?.endsWith('/edit')}
+							<Breadcrumb.Separator class="hidden md:block" />
+							<Breadcrumb.Item>
+								<Breadcrumb.Page>edit</Breadcrumb.Page>
+							</Breadcrumb.Item>
+						{:else if page.route.id?.endsWith('/create')}
 							<Breadcrumb.Separator class="hidden md:block" />
 							<Breadcrumb.Item>
 								<Breadcrumb.Page>create</Breadcrumb.Page>
-							</Breadcrumb.Item>
-						{/if}
-						{#if page.route.id?.startsWith('/ctfs/c/[]')}
-							<Breadcrumb.Separator class="hidden md:block" />
-							<Breadcrumb.Item>
-								<Breadcrumb.Page>[]</Breadcrumb.Page>
 							</Breadcrumb.Item>
 						{/if}
 					</Breadcrumb.List>

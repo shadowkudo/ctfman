@@ -85,12 +85,10 @@ public class Team extends Authentication {
 
   public static List<Team> getAll(boolean ignoreDeleted) throws SQLException {
     List<Team> teams = new ArrayList<>();
-    String query =
-        "SELECT authentication, description, country, created_at, deleted_at FROM team JOIN"
-            + " authentication a ON team.authentication = a.identification";
+    String query = "SELECT * FROM team_with_captain_view";
 
     if (ignoreDeleted) {
-      query = query + " AND deleted_at IS NULL";
+      query = query + " WHERE deleted_at IS NULL";
     }
 
     try (Connection conn = DB.getConnection()) {
@@ -103,7 +101,7 @@ public class Team extends Authentication {
                 res.getString("authentication"),
                 res.getString("description"),
                 res.getString("country"),
-                null,
+                res.getString("captain"),
                 null,
                 res.getTimestamp("created_at"),
                 res.getTimestamp("deleted_at")));
