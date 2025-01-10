@@ -1,14 +1,12 @@
 <script lang="ts">
 	import NavMain from '$lib/components/nav-main.svelte';
-	import NavTeams from '$lib/components/nav-teams.svelte';
 	import NavUser from '$lib/components/nav-user.svelte';
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import type { ComponentProps } from 'svelte';
-	import type { User } from '../../routes/+layout';
+	import type { User } from '../../routes';
 	import { LandPlotIcon } from 'lucide-svelte';
 	import { HomeIcon, UsersIcon, FlagIcon } from 'lucide-svelte';
 
-	import { page } from '$app/state';
 	import { useSidebar } from '$lib/components/ui/sidebar/index.js';
 	import { cn } from '$lib/utils';
 	import { NavBuilder } from '$lib/nav';
@@ -35,19 +33,6 @@
 			})
 			.get()
 	);
-
-	// TODO: remove teams here
-	const teams = [
-		{
-			name: 'team1'
-		},
-		{
-			name: 'team2'
-		},
-		{
-			name: 'team3'
-		}
-	];
 </script>
 
 <Sidebar.Root bind:ref {collapsible} {...restProps}>
@@ -67,9 +52,6 @@
 	<Sidebar.Content>
 		<NavMain items={navMain} />
 		<!-- TODO: replace with the user's teams -->
-		{#if user}
-			<NavTeams {teams} />
-		{/if}
 	</Sidebar.Content>
 	<Sidebar.Footer>
 		<NavUser {user} />
