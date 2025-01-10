@@ -1,19 +1,35 @@
 <script lang="ts">
 	import type { Team } from '.';
-	import { BadgeInfoIcon, CalendarIcon, EarthIcon, KeySquareIcon, ShieldIcon } from 'lucide-svelte';
+	import {
+		BadgeInfoIcon,
+		CalendarIcon,
+		EarthIcon,
+		KeySquareIcon,
+		SettingsIcon,
+		ShieldIcon
+	} from 'lucide-svelte';
 	import { formatRelative } from 'date-fns';
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	interface Props {
 		team: Team;
+		isCaptain: boolean;
 	}
 
-	let { team }: Props = $props();
+	let { team, isCaptain }: Props = $props();
 </script>
 
 <div>
-	<div class="px-4 sm:px-0">
-		<h3 class="text-base/7 font-semibold text-gray-900">Team information</h3>
-		<p class="mt-1 max-w-2xl text-sm/6 text-gray-500">Details</p>
+	<div class="flex gap-2 px-4 sm:px-0">
+		<div class="grow">
+			<h3 class="text-base/7 font-semibold text-gray-900">Team information</h3>
+			<p class="mt-1 max-w-2xl text-sm/6 text-gray-500">Details</p>
+		</div>
+		{#if isCaptain}
+			<Button href={`/teams/${team.name}/edit`} size="icon" variant="outline">
+				<SettingsIcon />
+			</Button>
+		{/if}
 	</div>
 	<div class="mt-6 border-t border-gray-100">
 		<dl class="grid grid-cols-1 divide-y divide-gray-100 sm:grid-cols-2">

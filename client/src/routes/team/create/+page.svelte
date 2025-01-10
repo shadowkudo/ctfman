@@ -8,7 +8,6 @@
 	import * as Select from '$lib/components/ui/select';
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import { useError } from '$lib/utils';
-	import { error } from '@sveltejs/kit';
 	import { toast } from 'svelte-sonner';
 
 	interface CreateForm {
@@ -50,7 +49,7 @@
 		}
 
 		toast.success('success', { description: 'redirecting to the new team' });
-		goto(`/teams/${form.name}`);
+		await goto(`/teams/${form.name}`, { invalidateAll: true });
 	}
 
 	const countrySelectContent = $derived(

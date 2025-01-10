@@ -20,7 +20,7 @@
 				<Tabs.Trigger value="ctfs" class="grow text-center">Ctfs</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="info">
-				<Info team={data.team} />
+				<Info team={data.team} isCaptain={data.team.captain == data.user?.name} />
 			</Tabs.Content>
 			<Tabs.Content value="members">
 				<Members members={[]} />
