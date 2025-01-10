@@ -1,6 +1,7 @@
 import type { PageLoad } from './$types';
 import type { PageFetch } from '$lib/data';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
+import { error } from '@sveltejs/kit';
 
 interface Team {
 	name: string;
@@ -19,6 +20,10 @@ export const load: PageLoad = async ({ fetch }) => {
 
 async function fetchUser(fetch: PageFetch): Promise<Team[]> {
 	let res = await fetch(`${PUBLIC_BACKEND_URL}/teams`, { credentials: 'include' });
+
+	if (res.status == 401) {
+		error(401, { message: 'Unauthenticated', subtext: 'You need to login to access this content' });
+	}
 
 	if (res.status != 200) {
 		console.error(`teams/+page.tx@fetchUser: unexpected status: ${res.status}`);

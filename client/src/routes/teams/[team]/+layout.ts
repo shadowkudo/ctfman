@@ -6,13 +6,19 @@ import { error } from '@sveltejs/kit';
 
 export const load: LayoutLoad = async ({ fetch, params }) => {
 	if (!params.team) {
-		error(404, 'Not found');
+		error(404, {
+			message: 'Not found',
+			subtext: 'Sorry, we couldn’t find the page you’re looking for.'
+		});
 	}
 
 	let team: Team | null = await fetchTeam(fetch, params.team);
 
 	if (!team) {
-		error(404, 'Not found');
+		error(404, {
+			message: 'Not found',
+			subtext: 'Sorry, we couldn’t find the page you’re looking for.'
+		});
 	}
 
 	return {
