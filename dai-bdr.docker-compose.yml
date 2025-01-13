@@ -24,6 +24,7 @@ services:
       DB_USER: "${PG_USER:-ctfman}"
       DB_PASS: "${PG_PASS:-ctfman}"
       DB_HOST: "${DB_HOST:-db}"
+      ALLOWED_ORIGINS: "${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME:-},${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME:-}"
     command: "serve --port 80 --address 0.0.0.0"
     labels:
       ## Traefik

@@ -84,8 +84,16 @@ public class AuthController {
           if (session.insert() == 1) {
             Cookie cookie = new Cookie("session", session.getToken());
             cookie.setPath("/");
-            cookie.setSameSite(SameSite.STRICT);
-            ctx.cookie(cookie);
+            cookie.setSameSite(SameSite.NONE);
+            cookie.setSecure(true);
+            ctx.cookie(
+                cookie.getName()
+                    + "="
+                    + cookie.getValue()
+                    + "Path="
+                    + cookie.getPath()
+                    + "SameStie=None; Secure; Partitioned;");
+            // ctx.cookie(cookie);
             ctx.status(HttpStatus.NO_CONTENT);
             return;
           }
