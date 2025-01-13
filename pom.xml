@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ch.heigvd.dai</groupId>
+  <artifactId>ctfman</artifactId>
+  <version>1.0.0</version>
+
+  <properties>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <javalin.version>6.4.0</javalin.version>
+    <javalin.openapi.version>6.4.0</javalin.openapi.version>
+  </properties>
+
+
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/shadowkudo/ctfman</url>
+    </repository>
+
+    <snapshotRepository>
+      <id>github</id>
+      <url>https://maven.pkg.github.com/shadowkudo/ctfman</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencies>
+    <!-- https://mvnrepository.com/artifact/info.picocli/picocli -->
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>4.7.6</version>
+    </dependency>
+    <dependency>
+      <groupId>io.javalin</groupId>
+      <artifactId>javalin</artifactId>
+      <version>${javalin.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>2.0.16</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <version>2.18.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <version>2.18.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>6.2.1</version>
+    </dependency>
+    <!-- OpenApi plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-openapi-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
+    <!-- Swagger plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-swagger-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
+    <!-- ReDoc plugin -->
+    <dependency>
+      <groupId>io.javalin.community.openapi</groupId>
+      <artifactId>javalin-redoc-plugin</artifactId>
+      <version>${javalin.openapi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>26.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>at.favre.lib</groupId>
+      <artifactId>bcrypt</artifactId>
+      <version>0.10.2</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-shade-plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <transformers>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>ch.heigvd.dai.Main</mainClass>
+                </transformer>
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
+                  <resource>MANIFEST.MF</resource>
+                </transformer>
+              </transformers>
+              <filters>
+                <!-- This filter is needed to avoid a bug in the shade plugin -->
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.10.1</version>
+          <configuration>
+            <annotationProcessorPaths>
+              <annotationProcessorPath>
+                <groupId>io.javalin.community.openapi</groupId>
+                <artifactId>openapi-annotation-processor</artifactId>
+                <version>${javalin.openapi.version}</version>
+              </annotationProcessorPath>
+            </annotationProcessorPaths>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
