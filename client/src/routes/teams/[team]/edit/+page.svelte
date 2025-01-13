@@ -74,8 +74,8 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Create</Card.Title>
-		<Card.Description>Create a team</Card.Description>
+		<Card.Title>Edit</Card.Title>
+		<Card.Description>Edit team {data.team.name}</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form
@@ -140,7 +140,7 @@
 					</div>
 				</div>
 			</div>
-			<Button type="submit">Create</Button>
+			<Button type="submit">Save</Button>
 		</form>
 	</Card.Content>
 </Card.Root>
