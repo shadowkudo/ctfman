@@ -13,9 +13,30 @@
         <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#development">Development</a></li>
-        <li><a href="#docker">Docker</a></li>
-        <li><a href="#docker-compose">Docker Compose</a></li>
+        <li><a href="#running-in-local">Local</a></li>
+        <li><a href="#running-with-docker">Docker</a></li>
+        <li><a href="#running-with-docker-compose">Docker Compose</a></li>
+      </ul>
+    </li>
+    <li>
+        <a href="#documentation">Documentation</a>
+      <ul>
+        <li>
+            <a href="#vm-azure">VM with Azure</a>
+          <ul>
+            <li><a href="#installation">Installation</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+          </ul>
+        </li>
+        <li><a href="#zone-dns">Zone DNS</a></li>
+        <li><a href="#api">API</a></li>
+      </ul>
+    </li>
+    <li>
+        <a href="#usage">Usage</a>
+      <ul>
+        <li><a href="#examples-using-curl">Curl</a></li>
+        <li><a href="#examples-using-ui-on-a-web-browser">UI on web browser</a></li>
       </ul>
     </li>
     <li><a href="#license">License</a></li>
@@ -82,7 +103,7 @@ The goal of `CTFman` - a web application using a database - is to efficiently ma
   winget install EclipseAdoptium.Temurin.21.JDK
   ```
 
-#### Development
+#### Running in local
 
 Clone this repository with either `ssh` or `http`, but we recommend using `ssh` as it is more secure.
 
@@ -117,6 +138,73 @@ Run the application using Docker Compose:
 docker compose --profile dev up -d
 ```
 
+<!-- DOCUMENTATION -->
+
+## Documentation
+
+### VM - Azure
+
+In our project, we choose to use Microsoft Azure as the provider for the virtual machine for our web server. See below for the installation and configuration process for a student account. 
+
+#### Installation
+
+Access the Azure portal with the following link: <https://portal.azure.com> and log in.
+
+Create a new virtual machine from the dashboard in section `Create a resource`.
+
+Select a virtual machine with the following characteristics:
+
+- **Project details**
+  - **Subscription**: Azure for Students
+  - **Resource group**: Create new with the name `heig-vd-dai-course`
+- **Instance details**
+  - **Virtual machine name**: `heig-vd-dai-course-vm`
+  - **Region**: (Europe) West Europe
+  - **Availability options**: No infrastructure redundancy required
+  - **Security type**: Trusted launch virtual machines (the default)
+  - **Image**: Ubuntu Server 24.04 LTS - x64 Gen2 (the default)
+  - **VM architecture**: x64
+  - **Size**: `Standard_B1s` - you might need to click _"See all sizes"_ to see
+    this option
+- **Administrator account**
+  - **Authentication type**: SSH public key
+  - **Username**: `ubuntu` - please use this username so the teaching staff can
+    help you if needed
+  - **SSH public key source**: Use existing public key
+  - **SSH public key**: Paste your public key here - see the note below for more
+    information
+- **Inbound port rules**
+  - **Public inbound ports**: Allow selected ports
+  - **Select inbound ports**: HTTP (80), HTTPS (443), SSH (22)
+
+Click on the `Review + create` button.
+
+Validate the configuration and click on the `Create` button.
+
+It might take a few minutes to create the virtual machine. Once the virtual
+machine is created, you can access it with the `Go to resource` button.
+
+Note the public IP address of the virtual machine. You will need it to connect
+to the virtual machine with SSH later.
+
+
+#### Configuration
+
+TODO
+
+### Zone DNS
+
+TODO
+
+#### Proof using nslookup (Validation)
+
+TODO
+
+### API
+
+With `Swagger`, documentation is created during coding; see the endpoint `/swagger` or `/redoc` to look at the API documentation.
+
+<!-- USAGE -->
 #### Usage
 
 1. Starting the database
@@ -136,27 +224,11 @@ docker compose up prod -d
 firefox https://ctfman.cybernest.ch
 ```
 
-<!-- DOCUMENTATION -->
-
-## Documentation
-
-### API
-
-With `Swagger`, documentation is created during coding; see the endpoint `/swagger` or `/redoc` to look at the API documentation.
-
 #### Examples using Curl
 
 TODO
 
-### VM - Azure
-
-TODO
-
-### DNS zone
-
-TODO
-
-#### Proof using nslookup
+#### Examples using the UI on a web browser
 
 TODO
 
@@ -182,7 +254,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- CONTACT -->
+<!-- CONTACTS -->
 
 ## Contacts
 
