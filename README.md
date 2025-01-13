@@ -187,10 +187,54 @@ machine is created, you can access it with the `Go to resource` button.
 Note the public IP address of the virtual machine. You will need it to connect
 to the virtual machine with SSH later.
 
-
 #### Configuration
 
-TODO
+In this section, you will access the virtual machine with SSH and configure it.
+
+Using the public IP address of the virtual machine, you can connect to the
+virtual machine with SSH with the following command:
+
+```sh
+# Connect to the virtual machine with SSH
+ssh ubuntu@<vm public ip>
+```
+
+The first time you connect to the virtual machine, you will be asked to confirm
+the fingerprint of the public key of the virtual machine.
+
+The output should be similar to the following:
+
+```text
+The authenticity of host '20.73.17.105 (20.73.17.105)' can't be established.
+ED25519 key fingerprint is SHA256:Xl0X5kv+aeZV28XA9iJ/L+geFVVvOvG4foRixbGRYnY.
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?
+```
+
+You can type `yes` and press the `Enter` key.
+
+Once connected to the virtual machine, you can update the packages with the
+following command:
+
+```sh
+# Update the available packages
+sudo apt update
+
+# Upgrade the packages
+sudo apt upgrade
+```
+
+You can then reboot the virtual machine with the following command to apply all
+the updates:
+
+```sh
+# Reboot the virtual machine
+sudo reboot
+```
+
+Install and configure Docker and Docker Compose on the virtual machine. You will need them to run our web application.
+
+Congratulations! You have now an up-to-date and configured virtual machine to use.
 
 ### Zone DNS
 
