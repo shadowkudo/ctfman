@@ -47,3 +47,6 @@ Thumbs.db
 client-data/
 server-data/
 .factorypath
+
+# credentials
+.env
