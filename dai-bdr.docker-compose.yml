@@ -24,8 +24,7 @@ services:
       DB_USER: "${PG_USER:-ctfman}"
       DB_PASS: "${PG_PASS:-ctfman}"
       DB_HOST: "${DB_HOST:-db}"
-      SERVER_PORT: "${SERVER_PORT:-8080}"
-    command: "serve"
+    command: "serve --port 80 --address 0.0.0.0"
     labels:
       ## Traefik
       - traefik.enable=true
@@ -33,6 +32,7 @@ services:
       ## Routers
       - traefik.http.routers.ctfman_api.entrypoints=https
       - traefik.http.routers.ctfman_api.rule=Host(`${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_api.loadbalancer.server.port=80
   db:
     image: bitnami/postgresql:17
     restart: unless-stopped
@@ -57,7 +57,7 @@ services:
     volumes:
       - ./client:/home/bun/app
     restart: unless-stopped
-    entrypoint: 'ash -c "bun install && bun run build && bun run preview"'
+    entrypoint: 'ash -c "bun install && bun run build && bun run preview --port 80 --host 0.0.0.0"'
     networks:
       - traefik_network
     labels:
@@ -66,7 +66,8 @@ services:
       - traefik.docker.network=traefik_network
       ## Routers
       - traefik.http.routers.ctfman_client.entrypoints=https
-      - traefik.http.routers.ctfman_lient.rule=Host(`${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.routers.ctfman_client.rule=Host(`${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_client.loadbalancer.server.port=80
   traefik:
     image: traefik:${TRAEFIK_IMAGE_VERSION:-latest}
     command:
