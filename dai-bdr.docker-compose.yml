@@ -8,8 +8,6 @@ volumes:
 
 services:
   api:
-    profiles:
-      - prod
     image: ghcr.io/shadowkudo/ctfman:latest
     build:
       context: .
@@ -36,9 +34,6 @@ services:
       - traefik.http.routers.ctfman_api.entrypoints=https
       - traefik.http.routers.ctfman_api.rule=Host(`${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}`)
   db:
-    profiles:
-      - prod
-      - dev
     image: bitnami/postgresql:17
     restart: unless-stopped
     ports:
