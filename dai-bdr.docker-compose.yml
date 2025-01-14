@@ -58,7 +58,7 @@ services:
     volumes:
       - ./client:/home/bun/app
     # restart: unless-stopped # removed to prevent lockups
-    entrypoint: 'ash -c "bun install && bunx http-server --port 80 build"'
+    entrypoint: 'ash -c "bun install && bun run build && bun run preview --port 80"'
     networks:
       - traefik_network
     labels:
