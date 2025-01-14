@@ -86,14 +86,14 @@ public class AuthController {
             cookie.setPath("/");
             cookie.setSameSite(SameSite.NONE);
             cookie.setSecure(true);
-            ctx.cookie(
-                cookie.getName()
-                    + "="
-                    + cookie.getValue()
-                    + "Path="
-                    + cookie.getPath()
-                    + "SameStie=None; Secure; Partitioned;");
-            // ctx.cookie(cookie);
+            // ctx.cookie(
+            //     cookie.getName()
+            //         + "="
+            //         + cookie.getValue()
+            //         + "Path="
+            //         + cookie.getPath()
+            //         + "SameStie=None; Secure; Partitioned;");
+            ctx.cookie(cookie);
             ctx.status(HttpStatus.NO_CONTENT);
             return;
           }
