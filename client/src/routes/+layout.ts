@@ -3,6 +3,8 @@ import type { PageFetch } from '$lib/data';
 import type { User } from '.';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 
+export const ssr = false;
+
 export const load: LayoutLoad = async ({ fetch }) => {
 	return {
 		user: await fetchUser(fetch)

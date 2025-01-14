@@ -4,8 +4,6 @@ import type { Team } from '.';
 import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { useError } from '$lib/utils';
 
-export const prerender = false;
-
 export const load: LayoutLoad = async ({ fetch, params }) => {
 	if (!params.team || !params.team.length) {
 		useError(404);
