@@ -5,7 +5,7 @@ import { PUBLIC_BACKEND_URL } from '$env/static/public';
 import { useError } from '$lib/utils';
 
 export const load: LayoutLoad = async ({ fetch, params }) => {
-	if (!params.team) {
+	if (!params.team || !params.team.length) {
 		useError(404);
 	}
 

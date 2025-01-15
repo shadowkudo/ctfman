@@ -18,14 +18,14 @@ services:
     networks:
       - default
       - traefik_network
-    restart: unless-stopped
+    # restart: unless-stopped # removed to prevent lockups
     environment:
       DB_NAME: "${PG_DB:-ctfman}"
       DB_USER: "${PG_USER:-ctfman}"
       DB_PASS: "${PG_PASS:-ctfman}"
       DB_HOST: "${DB_HOST:-db}"
-      SERVER_PORT: "${SERVER_PORT:-8080}"
-    command: "serve"
+      ALLOWED_ORIGINS: "${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME:-},${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME:-}"
+    command: "serve --port 80 --address 0.0.0.0"
     labels:
       ## Traefik
       - traefik.enable=true
@@ -33,9 +33,10 @@ services:
       ## Routers
       - traefik.http.routers.ctfman_api.entrypoints=https
       - traefik.http.routers.ctfman_api.rule=Host(`${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_api.loadbalancer.server.port=80
   db:
     image: bitnami/postgresql:17
-    restart: unless-stopped
+    # restart: unless-stopped # removed to prevent lockups
     ports:
       - 127.0.0.1:5432:5432
     environment:
@@ -56,8 +57,8 @@ services:
       PUBLIC_BACKEND_URL: "https://${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}"
     volumes:
       - ./client:/home/bun/app
-    restart: unless-stopped
-    entrypoint: 'ash -c "bun install && bun run build && bun run preview"'
+    # restart: unless-stopped # removed to prevent lockups
+    entrypoint: 'ash -c "bun install && bun run build && bun run preview --port 80 --host 0.0.0.0"'
     networks:
       - traefik_network
     labels:
@@ -66,7 +67,8 @@ services:
       - traefik.docker.network=traefik_network
       ## Routers
       - traefik.http.routers.ctfman_client.entrypoints=https
-      - traefik.http.routers.ctfman_lient.rule=Host(`${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.routers.ctfman_client.rule=Host(`${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_client.loadbalancer.server.port=80
   traefik:
     image: traefik:${TRAEFIK_IMAGE_VERSION:-latest}
     command:
@@ -98,7 +100,7 @@ services:
       - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
-    restart: unless-stopped
+    # restart: unless-stopped # removed to prevent system lockups
     networks:
       # Attach the Traefik container to the traefik network
       - traefik_network

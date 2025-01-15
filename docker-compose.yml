@@ -16,8 +16,7 @@ services:
       DB_USER: "${PG_USER:-ctfman}"
       DB_PASS: "${PG_PASS:-ctfman}"
       DB_HOST: "${DB_HOST:-db}"
-      SERVER_PORT: "${SERVER_PORT:-8080}"
-    command: "serve --port 8080"
+    command: "serve --port 80"
   dev:
     profiles:
       - dev
