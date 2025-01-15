@@ -1,12 +1,12 @@
 package ch.heigvd.dai.middlewares;
 
-import java.util.Arrays;
-
 import ch.heigvd.dai.models.User;
 import ch.heigvd.dai.models.User.Role;
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import io.javalin.http.HandlerType;
 import io.javalin.http.UnauthorizedResponse;
+import java.util.Arrays;
 
 public class AuthMiddleware implements Handler {
 
@@ -22,6 +22,10 @@ public class AuthMiddleware implements Handler {
 
   @Override
   public void handle(Context ctx) {
+    if (ctx.method() == HandlerType.OPTIONS) {
+      return;
+    }
+
     User user = ctx.attribute("user");
 
     if (user == null) {
@@ -38,7 +42,5 @@ public class AuthMiddleware implements Handler {
     if (!isAllowed) {
       throw new UnauthorizedResponse();
     }
-
   }
-
 }
