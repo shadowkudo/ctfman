@@ -1,0 +1,133 @@
+networks:
+  # We define a network for Traefik and all the services it will manage
+  traefik_network:
+    name: traefik_network
+
+volumes:
+  pgdata:
+
+services:
+  api:
+    image: ghcr.io/shadowkudo/ctfman:latest
+    build:
+      context: .
+      target: prod
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - default
+      - traefik_network
+    # restart: unless-stopped # removed to prevent lockups
+    environment:
+      DB_NAME: "${PG_DB:-ctfman}"
+      DB_USER: "${PG_USER:-ctfman}"
+      DB_PASS: "${PG_PASS:-ctfman}"
+      DB_HOST: "${DB_HOST:-db}"
+      ALLOWED_ORIGINS: "${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME:-},${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME:-}"
+    command: "serve --port 80 --address 0.0.0.0"
+    labels:
+      ## Traefik
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      ## Routers
+      - traefik.http.routers.ctfman_api.entrypoints=https
+      - traefik.http.routers.ctfman_api.rule=Host(`${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_api.loadbalancer.server.port=80
+  db:
+    image: bitnami/postgresql:17
+    # restart: unless-stopped # removed to prevent lockups
+    ports:
+      - 127.0.0.1:5432:5432
+    environment:
+      POSTGRESQL_USERNAME: "${PG_USER:-ctfman}"
+      POSTGRESQL_PASSWORD: "${PG_PASS:-ctfman}"
+      POSTGRESQL_DATABASE: "${PG_DB:-ctfman}"
+      POSTGRESQL_POSTGRES_PASSWORD: "${PG_ROOT_PASS:-root}"
+    volumes:
+      - pgdata:/bitnami/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+  client:
+    image: oven/bun:alpine
+    environment:
+      PUBLIC_BACKEND_URL: "https://${CTFMAN_API_FULLY_QUALIFIED_DOMAIN_NAME}"
+    volumes:
+      - ./client:/home/bun/app
+    # restart: unless-stopped # removed to prevent lockups
+    entrypoint: 'ash -c "bun install && bun run build && bun run preview --port 80 --host 0.0.0.0"'
+    networks:
+      - traefik_network
+    labels:
+      ## Traefik
+      - traefik.enable=true
+      - traefik.docker.network=traefik_network
+      ## Routers
+      - traefik.http.routers.ctfman_client.entrypoints=https
+      - traefik.http.routers.ctfman_client.rule=Host(`${CTFMAN_CLIENT_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      - traefik.http.services.ctfman_client.loadbalancer.server.port=80
+  traefik:
+    image: traefik:${TRAEFIK_IMAGE_VERSION:-latest}
+    command:
+      ## Global
+      # Uncomment next line when testing
+      # - --log.level=DEBUG
+      - --api.dashboard=${TRAEFIK_ENABLE_DASHBOARD:-false}
+      ## Docker
+      # Use Docker as a provider
+      - --providers.docker=true
+      # Do not expose containers by default
+      - --providers.docker.exposedbydefault=false
+      ## Entrypoints
+      # Define an entrypoint for HTTP on port 80
+      - --entrypoints.http.address=:80
+      # Define an entrypoint for HTTPS on port 443
+      - --entrypoints.https.address=:443
+      # We redirect all HTTP traffic to HTTPS
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entrypoints.http.http.redirections.entrypoint.scheme=https
+      - --entrypoints.http.http.redirections.entrypoint.permanent=true
+      # We enable TLS for all HTTPS traffic
+      - --entrypoints.https.http.tls=true
+      - --entrypoints.https.http.tls.certresolver=letsencrypt
+      ## Certificates
+      # We add Let's Encrypt as a default certificate resolver
+      # Uncomment next line when testing
+      # - --certificatesResolvers.letsencrypt.acme.caServer=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+    # restart: unless-stopped # removed to prevent system lockups
+    networks:
+      # Attach the Traefik container to the traefik network
+      - traefik_network
+    ports:
+      # Expose port 80 on the host for all incoming HTTP traffic
+      - 80:80
+      # Expose port 443 on the host for all incoming HTTPS traffic
+      - 443:443
+    volumes:
+      # This is needed for Traefik to be able to listen to the Docker events
+      # It allows Traefik to react almost immediately to changes in the
+      # containers it manages
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # This is needed for Traefik to be able to store the Let's Encrypt certificates
+      - ./letsencrypt:/letsencrypt
+    # Labels can be attached to containers for various customizations.
+    # In this case, the labels are to configure Traefik
+    labels:
+      ## Traefik
+      # Enable Traefik for this container
+      - traefik.enable=true
+      # Help Traefik find this container on the network
+      - traefik.docker.network=traefik_network
+      ## Routers
+      # The entrypoint of this container is HTTPS
+      - traefik.http.routers.traefik.entrypoints=https
+      # This container is accessible with the fully qualified domain name
+      - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_FULLY_QUALIFIED_DOMAIN_NAME}`)
+      # This is needed to access the Traefik dashboard
+      - traefik.http.routers.traefik.service=api@internal

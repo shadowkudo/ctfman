@@ -84,7 +84,15 @@ public class AuthController {
           if (session.insert() == 1) {
             Cookie cookie = new Cookie("session", session.getToken());
             cookie.setPath("/");
-            cookie.setSameSite(SameSite.STRICT);
+            cookie.setSameSite(SameSite.NONE);
+            cookie.setSecure(true);
+            // ctx.cookie(
+            //     cookie.getName()
+            //         + "="
+            //         + cookie.getValue()
+            //         + "Path="
+            //         + cookie.getPath()
+            //         + "SameStie=None; Secure; Partitioned;");
             ctx.cookie(cookie);
             ctx.status(HttpStatus.NO_CONTENT);
             return;
@@ -118,13 +126,13 @@ public class AuthController {
 
   @OpenApi(
       path = "/profile",
-      methods = HttpMethod.POST,
+      methods = HttpMethod.GET,
       summary = "get profile",
       operationId = "profile",
       tags = {"Auth"},
       responses = {
         @OpenApiResponse(
-            status = "204",
+            status = "200",
             description = "Profile details",
             content = {@OpenApiContent(from = User.class)})
       })
