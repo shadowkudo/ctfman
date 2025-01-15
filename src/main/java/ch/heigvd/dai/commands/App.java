@@ -5,6 +5,7 @@ import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.put;
 
 import ch.heigvd.dai.controllers.AuthController;
+import ch.heigvd.dai.controllers.CtfsController;
 import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
@@ -62,9 +63,14 @@ public class App implements Callable<Integer> {
                   cors -> {
                     cors.addRule(
                         it -> {
-                          if (Arrays.stream(options.cors).anyMatch("*"::equals)) {
+                          options.cors =
+                              Arrays.stream(options.cors)
+                                  .filter(f -> !f.isBlank())
+                                  .toArray(String[]::new);
+                          if (options.cors.length == 0
+                              || Arrays.stream(options.cors).anyMatch("*"::equals)) {
                             it.anyHost();
-                          } else {
+                          } else if (options.cors.length > 0) {
                             Arrays.stream(options.cors).forEach(it::allowHost);
                             it.allowCredentials = true;
                           }
@@ -84,6 +90,13 @@ public class App implements Callable<Integer> {
                           TeamsController teamsController = new TeamsController();
                           crud(teamsController);
                           put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
+                        });
+                    path(
+                        "/ctfs/{ctf-title}",
+                        () -> {
+                          CtfsController ctfController = new CtfsController();
+                          crud(ctfController);
+                          put(ctx -> ctfController.update(ctx, ctx.pathParam("ctf-title")));
                         });
                   });
             });
