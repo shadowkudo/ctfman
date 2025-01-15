@@ -97,14 +97,14 @@ public class App implements Callable<Integer> {
                          });
                   });
                 config.router.apiBuilder(
+                  () -> {
+                    path(
+                      "/groups/{roles}",
                         () -> {
-                            path(
-                                 "/groups/{roles}",
-                                 () -> {
-                                   UsersController usersController = new UsersController();
-                                   crud(usersController);
-                                 });
+                          UsersController usersController = new UsersController();
+                          crud(usersController);
                         });
+                  });
             });
 
     // Global middlewares
