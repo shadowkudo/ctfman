@@ -311,7 +311,9 @@ public class CtfsController implements CrudHandler {
         throw new ForbiddenResponse();
       }
 
-      // TODO: delete
+      if (ctf.delete() != 1) {
+        throw new InternalServerErrorResponse();
+      }
 
       ctx.status(HttpStatus.NO_CONTENT);
 

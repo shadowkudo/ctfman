@@ -212,4 +212,16 @@ public class Ctf {
       return stmt.executeUpdate();
     }
   }
+
+  public int delete() throws SQLException {
+
+    String query = "DELETE FROM ctf WHERE title = ?";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, this.title);
+
+      return stmt.executeUpdate();
+    }
+  }
 }
