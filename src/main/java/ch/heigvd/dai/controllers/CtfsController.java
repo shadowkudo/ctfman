@@ -13,7 +13,7 @@ import io.javalin.http.NotImplementedResponse;
 import io.javalin.openapi.*;
 import io.javalin.validation.BodyValidator;
 import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -61,7 +61,10 @@ public class CtfsController implements CrudHandler {
               required = true,
               content = {@OpenApiContent(from = CtfCreateRequest.class, type = ContentType.JSON)}),
       responses = {
-        @OpenApiResponse(status = "201", description = "Resource created"),
+        @OpenApiResponse(
+            status = "201",
+            description = "Resource created",
+            content = @OpenApiContent(from = Ctf.class, type = ContentType.JSON)),
         @OpenApiResponse(
             status = "401",
             description = "User not authenticated",
@@ -265,14 +268,14 @@ public class CtfsController implements CrudHandler {
       String description,
       String localisation,
       Ctf.Status status,
-      Timestamp start,
-      Timestamp end) {}
+      Instant start,
+      Instant end) {}
 
   public static record CtfUpdateRequest(
       Optional<String> title,
       Optional<String> description,
       Optional<String> localisation,
       Optional<Ctf.Status> status,
-      Optional<Timestamp> start,
-      Optional<Timestamp> end) {}
+      Optional<Instant> start,
+      Optional<Instant> end) {}
 }

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,8 +19,10 @@ public class Ctf {
   private String description;
   private String localisation;
   private Status status;
-  @Nullable private Timestamp startedAt;
-  @Nullable private Timestamp endedAt;
+
+  private Instant startedAt;
+
+  private Instant endedAt;
 
   public static enum Status {
     WIP("wip"),
@@ -40,7 +43,7 @@ public class Ctf {
 
     public static Status fromString(String val) {
       return Arrays.stream(Status.values())
-          .filter(s -> s.status.equals(val))
+          .filter(s -> s.status.equalsIgnoreCase(val))
           .findFirst()
           .orElse(null);
     }
@@ -52,19 +55,38 @@ public class Ctf {
       String description,
       String localisation,
       Status status,
+      Instant startedAt,
+      Instant endedAt) {
+    this(owner, title, description, localisation, status);
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
+  }
+
+  public Ctf(
+      String owner,
+      String title,
+      String description,
+      String localisation,
+      Status status,
       Timestamp startedAt,
       Timestamp endedAt) {
+    this(
+        owner,
+        title,
+        description,
+        localisation,
+        status,
+        startedAt.toInstant(),
+        endedAt.toInstant());
+  }
+
+  public Ctf(String owner, String title, String description, String localisation, Status status) {
+
     this.owner = owner;
     this.title = title;
     this.description = description;
     this.localisation = localisation;
     this.status = status;
-    this.startedAt = startedAt;
-    this.endedAt = endedAt;
-  }
-
-  public Ctf(String owner, String title, String description, String localisation, Status status) {
-    this(owner, title, description, localisation, status, null, null);
   }
 
   public String getOwner() {
@@ -107,19 +129,19 @@ public class Ctf {
     this.status = status;
   }
 
-  public Timestamp getStartedAt() {
+  public Instant getStartedAt() {
     return startedAt;
   }
 
-  public void setStartedAt(Timestamp startedAt) {
+  public void setStartedAt(Instant startedAt) {
     this.startedAt = startedAt;
   }
 
-  public Timestamp getEndedAt() {
+  public Instant getEndedAt() {
     return endedAt;
   }
 
-  public void setEndedAt(Timestamp endedAt) {
+  public void setEndedAt(Instant endedAt) {
     this.endedAt = endedAt;
   }
 
