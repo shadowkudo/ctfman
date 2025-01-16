@@ -82,7 +82,6 @@ public class CtfsController implements CrudHandler {
     // The auth middleware already checks that the user is logged in
     User user = ctx.attribute("user");
 
-    // Only a challenger can be the captain (and create a team)
     if (!user.hasRole(User.Role.ADMIN)) {
       throw new ForbiddenResponse();
     }

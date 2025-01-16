@@ -1,15 +1,7 @@
 package ch.heigvd.dai.commands;
 
-import static io.javalin.apibuilder.ApiBuilder.crud;
-import static io.javalin.apibuilder.ApiBuilder.path;
-import static io.javalin.apibuilder.ApiBuilder.put;
-
-import ch.heigvd.dai.controllers.AuthController;
-import ch.heigvd.dai.controllers.CtfsController;
-import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
-import ch.heigvd.dai.middlewares.AuthMiddleware;
-import ch.heigvd.dai.middlewares.SessionMiddleware;
+import ch.heigvd.dai.routing.Router;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.javalin.Javalin;
@@ -40,8 +32,7 @@ public class App implements Callable<Integer> {
 
     DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
-    Javalin app =
-        Javalin.create(
+    Javalin.create(
             config -> {
               config.jetty.defaultHost = options.address;
               config.jetty.defaultPort = options.port;
@@ -82,43 +73,9 @@ public class App implements Callable<Integer> {
               config.registerPlugin(new SwaggerPlugin());
               config.registerPlugin(new ReDocPlugin());
 
-              config.router.apiBuilder(
-                  () -> {
-                    path(
-                        "/teams/{teamName}",
-                        () -> {
-                          TeamsController teamsController = new TeamsController();
-                          crud(teamsController);
-                          put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
-                        });
-                    path(
-                        "/ctfs/{ctf-title}",
-                        () -> {
-                          CtfsController ctfController = new CtfsController();
-                          crud(ctfController);
-                          put(ctx -> ctfController.update(ctx, ctx.pathParam("ctf-title")));
-                        });
-                  });
-            });
-
-    // Global middlewares
-    app.before(new SessionMiddleware());
-
-    // Requires the user to be connected before accessing this endpoint
-    app.before("/teams", new AuthMiddleware());
-    app.before("/teams/*", new AuthMiddleware());
-
-    // Controllers
-    AuthController authController = new AuthController();
-
-    app.get("/", ctx -> ctx.result("Hello World"));
-
-    // Auth routes
-    app.post("/login", authController::login);
-    app.post("/logout", authController::logout);
-    app.get("/profile", authController::profile);
-
-    app.start();
+              config.router.apiBuilder(new Router());
+            })
+        .start();
 
     Runtime.getRuntime()
         .addShutdownHook(

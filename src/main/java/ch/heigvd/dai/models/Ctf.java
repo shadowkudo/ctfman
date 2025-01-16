@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import org.jetbrains.annotations.Nullable;
 
 public class Ctf {
@@ -19,10 +20,8 @@ public class Ctf {
   private String description;
   private String localisation;
   private Status status;
-
-  private Instant startedAt;
-
-  private Instant endedAt;
+  @Nullable private Instant startedAt;
+  @Nullable private Instant endedAt;
 
   public static enum Status {
     WIP("wip"),
@@ -68,16 +67,16 @@ public class Ctf {
       String description,
       String localisation,
       Status status,
-      Timestamp startedAt,
-      Timestamp endedAt) {
+      @Nullable Timestamp startedAt,
+      @Nullable Timestamp endedAt) {
     this(
         owner,
         title,
         description,
         localisation,
         status,
-        startedAt.toInstant(),
-        endedAt.toInstant());
+        Optional.ofNullable(startedAt).map(Timestamp::toInstant).orElse(null),
+        Optional.ofNullable(endedAt).map(Timestamp::toInstant).orElse(null));
   }
 
   public Ctf(String owner, String title, String description, String localisation, Status status) {
