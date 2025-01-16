@@ -46,6 +46,11 @@ public class Ctf {
           .findFirst()
           .orElse(null);
     }
+
+    @Override
+    public String toString() {
+      return this.status;
+    }
   }
 
   public Ctf(
@@ -184,6 +189,27 @@ public class Ctf {
       }
 
       return fromResultSet(res);
+    }
+  }
+
+  public int insert() throws SQLException {
+
+    String query =
+        "INSERT INTO ctf (title, description, admin, localisation, status, started_at, ended_at)"
+            + " VALUES(?, ?, ?, ?, ?, ?, ?)";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, this.title);
+      stmt.setString(2, this.description);
+      stmt.setString(3, this.owner);
+      stmt.setString(4, this.localisation);
+
+      stmt.setObject(5, this.status.toString(), java.sql.Types.OTHER);
+      stmt.setTimestamp(6, Timestamp.from(this.startedAt));
+      stmt.setTimestamp(7, Timestamp.from(this.endedAt));
+
+      return stmt.executeUpdate();
     }
   }
 }

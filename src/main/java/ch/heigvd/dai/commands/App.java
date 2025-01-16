@@ -2,6 +2,7 @@ package ch.heigvd.dai.commands;
 
 import ch.heigvd.dai.db.DB;
 import ch.heigvd.dai.routing.Router;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.javalin.Javalin;
@@ -46,6 +47,7 @@ public class App implements Callable<Integer> {
                             // == null. This is backward but we can't just inverse it through
                             // configuration so this will have to do
                             mapper
+                                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                                 .registerModule(new Jdk8Module().configureReadAbsentAsNull(true));
                           }));
