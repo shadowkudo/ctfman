@@ -72,7 +72,7 @@
 			<div class="px-4 py-6 sm:col-span-2 sm:px-0">
 				<dt class="flex items-center gap-1 text-sm/6 font-medium text-gray-900">
 					<CalendarIcon class="size-4" />
-					<span>Created</span>
+					<span>Started</span>
 				</dt>
 				<dd class="mt-1 text-sm/6 text-gray-700 sm:mt-2">
 					{#if ctf.startedAt}
@@ -85,7 +85,7 @@
 			<div class="px-4 py-6 sm:col-span-2 sm:px-0">
 				<dt class="flex items-center gap-1 text-sm/6 font-medium text-gray-900">
 					<CalendarIcon class="size-4" />
-					<span>Deleted</span>
+					<span>Ended</span>
 				</dt>
 				<dd class="mt-1 text-sm/6 text-gray-700 sm:mt-2">
 					{#if ctf.endedAt}
