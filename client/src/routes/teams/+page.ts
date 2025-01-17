@@ -14,11 +14,11 @@ interface Team {
 
 export const load: PageLoad = async ({ fetch }) => {
 	return {
-		teams: await fetchUser(fetch)
+		teams: await fetchTeams(fetch)
 	};
 };
 
-async function fetchUser(fetch: PageFetch): Promise<Team[]> {
+async function fetchTeams(fetch: PageFetch): Promise<Team[]> {
 	let res = await fetch(`${PUBLIC_BACKEND_URL}/teams`, { credentials: 'include' });
 
 	if (res.status == 401) {
