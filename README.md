@@ -164,7 +164,7 @@ Select a virtual machine with the following characteristics:
   - **Security type**: Trusted launch virtual machines (the default)
   - **Image**: Ubuntu Server 24.04 LTS - x64 Gen2 (the default)
   - **VM architecture**: x64
-  - **Size**: `Standard_B1s` - you might need to click _"See all sizes"_ to see
+  - **Size**: `Standard_B1ms` - you might need to click _"See all sizes"_ to see
     this option
 - **Administrator account**
   - **Authentication type**: SSH public key
@@ -176,6 +176,9 @@ Select a virtual machine with the following characteristics:
 - **Inbound port rules**
   - **Public inbound ports**: Allow selected ports
   - **Select inbound ports**: HTTP (80), HTTPS (443), SSH (22)
+
+> [!CAUTION]
+> The server needs to have at least 2 GiB RAM so that it will not freeze ! You may also add a swap file of 1 GiB to be more secure on memory usage.
 
 Click on the `Review + create` button.
 
@@ -205,7 +208,7 @@ the fingerprint of the public key of the virtual machine.
 The output should be similar to the following:
 
 ```text
-The authenticity of host '20.73.17.105 (20.73.17.105)' can't be established.
+The authenticity of host '104.45.17.214 (104.45.17.214)' can't be established.
 ED25519 key fingerprint is SHA256:Xl0X5kv+aeZV28XA9iJ/L+geFVVvOvG4foRixbGRYnY.
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])?
@@ -238,15 +241,54 @@ Congratulations! You have now an up-to-date and configured virtual machine to us
 
 ### Zone DNS
 
-TODO
+For the server to be accessible easily on the Internet, you need to set up a DNS - Domain Name Server - so that you will use a name instead of a ip address to access the server remotely.
 
-#### Proof using nslookup (Validation)
+You need to either buy a domain name (like we did using [Polisystems][polisystems]) or use a free domain name (see [Duckdns][duckdns]).
 
-TODO
+Add an A record to the DNS zone of your domain name provider to point to the IP address of the virtual machine.
+
+Add a second wildcard A record to the DNS zone of your domain name provider to point to the IP address of the virtual machine. This will allow access to all your services hosted under a subdomain of your domain name.
+
+![dns_zone](./presentation_assets/dns_zone.png)
+
+#### Validation
+
+Test the DNS resolution of the DNS records you added from the virtual machine and from your local machine.
+
+```sh
+# Test the DNS resolution
+nslookup ctfman.cybernest.ch
+```
+
+On success, the output should be similar to the following:
+
+```sh
+Server:		192.168.247.244
+Address:	192.168.247.244#53
+
+Non-authoritative answer:
+Name:	ctfman.cybernest.ch
+Address: 104.45.17.214
+```
+
+On failure, the output should be similar to the following:
+
+```sh
+Server:		192.168.247.244
+Address:	192.168.247.244#53
+
+** server can't find heig-vd-dai-course.duckdns.org: NXDOMAIN
+```
+
+> [!NOTE]
+> You might have to wait a few minutes (max 15 minutes in our experience) for the DNS record to be propagated and get a successful response. In case you use a WIFI to connect to the Internet, it may take longer if their cache take more time to reset (if during your configuration you made an error and had to update it)!
 
 ### API
 
-With `Swagger`, documentation is created during coding; see the endpoint `/swagger` or `/redoc` to look at the API documentation.
+With `Swagger`, documentation is created during coding; see the endpoint `https://api.ctfman.cybernest.ch/swagger` or `https://api.ctfman.cybernest.ch/redoc` to look at the API documentation.
+
+> [!NOTE]
+> It is recommended to use `swagger` as you can try the api.
 
 <!-- USAGE -->
 #### Usage
@@ -270,9 +312,83 @@ firefox https://ctfman.cybernest.ch
 
 #### Examples using Curl
 
-TODO
+If not yet installed, do (for Ubuntu systems):
+
+```sh
+# Install curl
+sudo apt install curl
+```
+
+##### Login as an user
+
+```sh
+curl -i -X 'POST' \
+  'https://api.ctfman.cybernest.ch/login' \
+  -H 'accept: */*' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "username": "user1",
+  "password": "password"
+}'
+```
+
+Will get:
+
+```sh
+HTTP/2 204
+content-type: text/plain
+date: Fri, 17 Jan 2025 16:57:54 GMT
+expires: Thu, 01 Jan 1970 00:00:00 GMT
+set-cookie: session=HTOsOvSX0eEPXaAwy76Zjwjaadim9bWeD4-DkOMVjqg; Path=/; Secure; SameSite=None
+```
+
+##### Get profile
+
+```sh
+curl -X 'GET' \
+  'https://api.ctfman.cybernest.ch/profile' \
+  -H 'accept: application/json' \
+  -H 'Cookie: HTOsOvSX0eEPXaAwy76Zjwjaadim9bWeD4-DkOMVjqg'
+```
+
+Will get:
+
+```sh
+HTTP/2 200
+content-type: application/json
+date: Fri, 17 Jan 2025 17:09:47 GMT
+content-length: 188
+
+{"createdAt":"2025-01-13T12:49:41Z","deletedAt":null,"authentication":"user1","primaryContact":"user1@example.com","isChallenger":true,"isAdmin":false,"isModerator":false,"isAuthor":false}
+```
+
+##### Logout
+
+```sh
+curl -i -X 'POST' \
+  'https://api.ctfman.cybernest.ch/logout' \
+  -H 'accept: */*' \
+  -d ''
+```
+
+TODO: add other curl examples
+
+> [!NOTE]
+> Should normally have the cookie but works also without.
+
+Will get:
+
+```sh
+HTTP/2 204
+content-type: text/plain
+date: Fri, 17 Jan 2025 16:58:16 GMT
+expires: Thu, 01 Jan 1970 00:00:00 GMT
+set-cookie: session=; Path=/; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Max-Age=0
+```
 
 #### Examples using the UI on a web browser
+
+The following examples have been made with [Firefox][firefox].
 
 TODO
 
@@ -323,3 +439,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [swagger]: https://swagger.io/
 [javalin]: https://javalin.io/
 [azure]: https://azure.microsoft.com/en-us/explore
+[duckdns]: http://www.duckdns.org/
+[polisystems]: https://polisystems.ch/en/index
+[firefox]: https://www.mozilla.org/en-US/firefox/new/
