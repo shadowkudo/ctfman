@@ -14,19 +14,34 @@ import org.jetbrains.annotations.Nullable;
 
 import ch.heigvd.dai.db.DB;
 
+import static org.eclipse.jetty.http.HttpParser.LOG;
+
 public class User extends Authentication {
 
   private String authentication;
   private String primaryContact;
-  private Boolean isChallenger;
-  private Boolean isAdmin;
-  private Boolean isModerator;
-  private Boolean isAuthor;
+  private Boolean isChallenger = false;
+  private Boolean isAdmin = false;
+  private Boolean isModerator = false;
+  private Boolean isAuthor = false;
 
   // TODO: photo
 
   public User(String name, String primaryContact) {
     this(name, primaryContact, null, null, null, null, null, null, null);
+  }
+
+  public User(String name, String primaryContact, String passwordHash, Role role) {
+    super(passwordHash, new Timestamp(System.currentTimeMillis()), null);
+    this.authentication = name;
+    this.primaryContact = primaryContact;
+    switch (role) {
+      case ADMIN: isAdmin = true; break;
+      case MODERATOR: isModerator = true; break;
+      case AUTHOR: isAuthor = true; break;
+      case CHALLENGER: isChallenger = true; break;
+      case null, default: isChallenger = true; break;
+    }
   }
 
   public User(String name, String primaryContact, String passwordHash, Timestamp createdAt, Timestamp deletedAt,
@@ -107,6 +122,49 @@ public class User extends Authentication {
     return list;
   }
 
+  public void insert_challenger() throws SQLException {
+    String query = "CALL create_challenger(?,?,?,NULL,NULL,NULL,NULL)";
+    try (Connection conn = DB.getConnection()){
+    PreparedStatement stmt = DB.getConnection().prepareStatement(query);
+    stmt.setString(1, this.authentication);
+    stmt.setString(2, this.passwordHash);
+    stmt.setString(3, this.primaryContact);
+    LOG.info(stmt.toString());
+
+      stmt.executeUpdate();
+    }
+  }
+
+  public void insert_manager(Role role) throws SQLException {
+    String query = "CALL create_manager(?,?,?,NULL,?,?,?)";
+    try (Connection conn = DB.getConnection()){
+      PreparedStatement stmt = DB.getConnection().prepareStatement(query);
+      stmt.setString(1, this.authentication);
+      stmt.setString(2, this.passwordHash);
+      stmt.setString(3, this.primaryContact);
+      switch (role) {
+        case ADMIN:
+          stmt.setBoolean(4, true);
+          stmt.setBoolean(5, false);
+          stmt.setBoolean(6, false);
+          break;
+        case MODERATOR:
+          stmt.setBoolean(4, false);
+          stmt.setBoolean(5, true);
+          stmt.setBoolean(6, false);
+          break;
+        case AUTHOR:
+          stmt.setBoolean(4, false);
+          stmt.setBoolean(5, false);
+          stmt.setBoolean(6, true);
+      }
+      LOG.info(stmt.toString());
+
+      stmt.executeUpdate();
+    }
+
+  }
+
   public String getAuthentication() {
     return authentication;
   }
@@ -131,9 +189,7 @@ public class User extends Authentication {
     this.isChallenger = isChallenger;
   }
 
-  public Boolean getIsAdmin() {
-    return isAdmin;
-  }
+  public Boolean getIsAdmin() { return isAdmin; }
 
   public void setIsAdmin(Boolean isAdmin) {
     this.isAdmin = isAdmin;

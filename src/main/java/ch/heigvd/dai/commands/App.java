@@ -113,7 +113,6 @@ public class App implements Callable<Integer> {
     // Requires the user to be connected before accessing this endpoint
     app.before("/teams", new AuthMiddleware());
     app.before("/teams/*", new AuthMiddleware());
-    app.before("/users", new AuthMiddleware());
     app.before("/users/*", new AuthMiddleware());
 
     // Controllers
