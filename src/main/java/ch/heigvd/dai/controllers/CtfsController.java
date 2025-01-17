@@ -2,7 +2,7 @@ package ch.heigvd.dai.controllers;
 
 import ch.heigvd.dai.models.Ctf;
 import ch.heigvd.dai.models.User;
-import ch.heigvd.dai.utils.Util;
+import ch.heigvd.dai.utils.Validation;
 import io.javalin.apibuilder.CrudHandler;
 import io.javalin.http.Context;
 import io.javalin.http.ForbiddenResponse;
@@ -107,13 +107,13 @@ public class CtfsController implements CrudHandler {
     CreateRequest rq =
         ctx.bodyValidator(CreateRequest.class)
             .check(
-                it -> it.title.map(String::isBlank).map(Util::not).orElse(false),
+                it -> it.title.map(Validation::notBlank).orElse(false),
                 "The title is required and cannot be left empty")
             .check(
-                it -> it.description.map(String::isBlank).map(Util::not).orElse(false),
+                it -> it.description.map(Validation::notBlank).orElse(false),
                 "The description is required and cannot be left empty")
             .check(
-                it -> it.localisation.map(String::isBlank).map(Util::not).orElse(false),
+                it -> it.localisation.map(Validation::notBlank).orElse(false),
                 "The localisation is required and cannot be left empty")
             .check(
                 it -> it.status.map(Ctf.Status::fromString).isPresent(),
@@ -227,7 +227,7 @@ public class CtfsController implements CrudHandler {
             content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON))
       })
   public void update(Context ctx, String title) {
-    boolean isPatch = ctx.method().equals(HandlerType.PATCH);
+    boolean isPut = ctx.method().equals(HandlerType.PUT);
     // The auth middleware already checks that the user is logged in
     User user = ctx.attribute("user");
 
@@ -238,17 +238,55 @@ public class CtfsController implements CrudHandler {
 
     BodyValidator<UpdateRequest> validator = ctx.bodyValidator(UpdateRequest.class);
 
-    if (isPatch) { // PATCH
-      // TODO: patch validation
-    } else { // PUT
-      // TODO: put validation
+    if (isPut) {
+      BodyValidator<CreateRequest> precheck =
+          ctx.bodyValidator(CreateRequest.class)
+              // Prechecks for null (missing fields)
+              .check(it -> it.title != null, "Missing title field")
+              .check(it -> it.description != null, "Missing description field")
+              .check(it -> it.localisation != null, "Missing localisation field")
+              .check(it -> it.status != null, "Missing status field")
+              .check(it -> it.start != null, "Missing start field")
+              .check(it -> it.end != null, "Missing end field");
+
+      if (!precheck.errors().isEmpty()) {
+        precheck.get();
+        return;
+      }
     }
+
+    // Redundant null checks but this is less code to handle both put/patch
+    validator
+        .check(
+            it -> it.title == null || it.title.map(Validation::notBlank).orElse(false),
+            "Title cannot be empty")
+        .check(
+            it -> it.description == null || it.description.map(Validation::notBlank).orElse(false),
+            "Description cannot be empty")
+        .check(
+            it ->
+                it.localisation == null || it.localisation.map(Validation::notBlank).orElse(false),
+            "Localisation cannot be empty")
+        .check(
+            it -> it.status == null || it.status.map(Ctf.Status::fromString).isPresent(),
+            "The status must be one of ["
+                + Stream.of(Ctf.Status.values())
+                    .map(Ctf.Status::toString)
+                    .collect(Collectors.joining(","))
+                + "]")
+        .check(
+            it ->
+                it.start == null
+                    || it.end == null
+                    || it.start.isEmpty()
+                    || it.end.isEmpty()
+                    || it.start.get().isBefore(it.end.get()),
+            "Start date must be before end date");
 
     UpdateRequest rq = validator.get();
 
     LOG.debug(rq.toString());
 
-    // Check that the user is the team captain
     try {
       Ctf ctf = Ctf.getByTitle(title);
 
@@ -260,7 +298,33 @@ public class CtfsController implements CrudHandler {
         throw new ForbiddenResponse();
       }
 
-      // TODO: rest of the update
+      if (rq.title != null) {
+        ctf.setTitle(rq.title.get());
+      }
+
+      if (rq.description != null) {
+        ctf.setDescription(rq.description.get());
+      }
+
+      if (rq.localisation != null) {
+        ctf.setLocalisation(rq.localisation.get());
+      }
+
+      if (rq.status != null) {
+        ctf.setStatus(rq.status.map(Ctf.Status::fromString).get());
+      }
+
+      if (rq.start != null) {
+        ctf.setStartedAt(rq.start.orElse(null));
+      }
+
+      if (rq.end != null) {
+        ctf.setEndedAt(rq.end.orElse(null));
+      }
+
+      if (ctf.update() != 1) {
+        throw new InternalServerErrorResponse();
+      }
 
       ctx.json(ctf);
 

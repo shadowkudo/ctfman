@@ -2,6 +2,7 @@ package ch.heigvd.dai.models;
 
 import ch.heigvd.dai.db.DB;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.javalin.openapi.OpenApiExample;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -95,6 +96,7 @@ public class Ctf {
     this.oldTitle = this.title;
   }
 
+  @OpenApiExample(value = "Admin1")
   public String getOwner() {
     return owner;
   }
@@ -103,6 +105,7 @@ public class Ctf {
     this.owner = owner;
   }
 
+  @OpenApiExample(value = "DEFCON")
   public String getTitle() {
     return title;
   }
@@ -111,6 +114,10 @@ public class Ctf {
     this.title = title;
   }
 
+  @OpenApiExample(
+      value =
+          "The largest hacking and security conference with presentations, workshops,"
+              + " contests, villages and the premier Capture The Flag Contest.")
   public String getDescription() {
     return description;
   }
@@ -119,6 +126,7 @@ public class Ctf {
     this.description = description;
   }
 
+  @OpenApiExample(value = "Las Vegas")
   public String getLocalisation() {
     return localisation;
   }
@@ -127,6 +135,7 @@ public class Ctf {
     this.localisation = localisation;
   }
 
+  @OpenApiExample(value = "wip")
   public Status getStatus() {
     return status;
   }
