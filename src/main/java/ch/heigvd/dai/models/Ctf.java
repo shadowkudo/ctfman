@@ -22,6 +22,7 @@ public class Ctf {
   private Status status;
   @Nullable private Instant startedAt;
   @Nullable private Instant endedAt;
+  private String oldTitle;
 
   public static enum Status {
     WIP("wip"),
@@ -91,6 +92,7 @@ public class Ctf {
     this.description = description;
     this.localisation = localisation;
     this.status = status;
+    this.oldTitle = this.title;
   }
 
   public String getOwner() {
@@ -208,6 +210,26 @@ public class Ctf {
       stmt.setObject(5, this.status.toString(), java.sql.Types.OTHER);
       stmt.setTimestamp(6, Timestamp.from(this.startedAt));
       stmt.setTimestamp(7, Timestamp.from(this.endedAt));
+
+      return stmt.executeUpdate();
+    }
+  }
+
+  public int update() throws SQLException {
+    String query =
+        "UPDATE ctf SET title = ?, description = ?, admin = ?, localisation = ?, started_at = ?,"
+            + " ended_at = ? WHERE title = ?";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+
+      stmt.setString(1, title);
+      stmt.setString(2, description);
+      stmt.setString(3, owner);
+      stmt.setString(4, localisation);
+      stmt.setTimestamp(5, Optional.ofNullable(startedAt).map(Timestamp::from).orElse(null));
+      stmt.setTimestamp(6, Optional.ofNullable(endedAt).map(Timestamp::from).orElse(null));
+      stmt.setString(7, oldTitle);
 
       return stmt.executeUpdate();
     }

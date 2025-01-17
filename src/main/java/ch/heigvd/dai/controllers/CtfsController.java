@@ -64,7 +64,7 @@ public class CtfsController implements CrudHandler {
               description =
                   "The startedAt and endedAt fields are optional and can be omitted or null. The"
                       + " status must be one of ['wip','in progress','ready','finished']",
-              content = {@OpenApiContent(from = CtfCreateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(
             status = "201",
@@ -91,8 +91,8 @@ public class CtfsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    BodyValidator<CtfCreateRequest> precheck =
-        ctx.bodyValidator(CtfCreateRequest.class)
+    BodyValidator<CreateRequest> precheck =
+        ctx.bodyValidator(CreateRequest.class)
             // Prechecks for null (missing fields)
             .check(it -> it.title != null, "Missing title field")
             .check(it -> it.description != null, "Missing description field")
@@ -104,8 +104,8 @@ public class CtfsController implements CrudHandler {
       return;
     }
 
-    CtfCreateRequest rq =
-        ctx.bodyValidator(CtfCreateRequest.class)
+    CreateRequest rq =
+        ctx.bodyValidator(CreateRequest.class)
             .check(
                 it -> it.title.map(String::isBlank).map(Util::not).orElse(false),
                 "The title is required and cannot be left empty")
@@ -211,7 +211,7 @@ public class CtfsController implements CrudHandler {
                   "When using PUT, all fields are required. When using PATCH, fields can be omitted"
                       + " in which case they will keep their current value",
               required = true,
-              content = {@OpenApiContent(from = CtfUpdateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -236,7 +236,7 @@ public class CtfsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    BodyValidator<CtfUpdateRequest> validator = ctx.bodyValidator(CtfUpdateRequest.class);
+    BodyValidator<UpdateRequest> validator = ctx.bodyValidator(UpdateRequest.class);
 
     if (isPatch) { // PATCH
       // TODO: patch validation
@@ -244,7 +244,7 @@ public class CtfsController implements CrudHandler {
       // TODO: put validation
     }
 
-    CtfUpdateRequest rq = validator.get();
+    UpdateRequest rq = validator.get();
 
     LOG.debug(rq.toString());
 
@@ -323,19 +323,49 @@ public class CtfsController implements CrudHandler {
     }
   }
 
-  public static record CtfCreateRequest(
-      Optional<String> title,
-      Optional<String> description,
-      Optional<String> localisation,
-      Optional<String> status,
-      Optional<Instant> start,
-      Optional<Instant> end) {}
+  @OpenApiName("CtfCreateRequest")
+  public static record CreateRequest(
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiDescription("The title of the ctf. Will be used as its primary key")
+          @OpenApiExample(value = "DEFCON")
+          @OpenApiStringValidation(minLength = "1", maxLength = "256")
+          @OpenApiRequired()
+          Optional<String> title,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(
+              value =
+                  "The largest hacking and security conference with presentations, workshops,"
+                      + " contests, villages and the premier Capture The Flag Contest.")
+          @OpenApiRequired()
+          Optional<String> description,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "Las Vegas")
+          @OpenApiRequired()
+          Optional<String> localisation,
+      @OpenApiPropertyType(definedBy = Ctf.Status.class)
+          @OpenApiExample(value = "wip")
+          @OpenApiRequired()
+          Optional<String> status,
+      @OpenApiPropertyType(definedBy = Instant.class) @OpenApiNullable() Optional<Instant> start,
+      @OpenApiPropertyType(definedBy = Instant.class) @OpenApiNullable() Optional<Instant> end) {}
 
-  public static record CtfUpdateRequest(
-      Optional<String> title,
-      Optional<String> description,
-      Optional<String> localisation,
-      Optional<Ctf.Status> status,
-      Optional<Instant> start,
-      Optional<Instant> end) {}
+  @OpenApiName("CtfUpdateRequest")
+  public static record UpdateRequest(
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiDescription("The title of the ctf. Will be used as its primary key")
+          @OpenApiExample(value = "DEFCON")
+          @OpenApiStringValidation(minLength = "1", maxLength = "256")
+          Optional<String> title,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(
+              value =
+                  "The largest hacking and security conference with presentations, workshops,"
+                      + " contests, villages and the premier Capture The Flag Contest.")
+          Optional<String> description,
+      @OpenApiPropertyType(definedBy = String.class) @OpenApiExample(value = "Las Vegas")
+          Optional<String> localisation,
+      @OpenApiPropertyType(definedBy = Ctf.Status.class) @OpenApiExample(value = "wip")
+          Optional<String> status,
+      @OpenApiPropertyType(definedBy = Instant.class) @OpenApiNullable() Optional<Instant> start,
+      @OpenApiPropertyType(definedBy = Instant.class) @OpenApiNullable() Optional<Instant> end) {}
 }
