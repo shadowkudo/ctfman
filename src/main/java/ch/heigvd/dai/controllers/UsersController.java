@@ -59,7 +59,6 @@ public class UsersController implements CrudHandler {
             }
         )
     public void create(Context ctx) {
-      LOG.info("Je suis dans create");
       User user = ctx.attribute("user");
       User newUser;
       CreateRequest request =
@@ -69,12 +68,10 @@ public class UsersController implements CrudHandler {
           .check(x -> x.password != null
             && !x.password.isBlank(), "can't register user with an empty password")
           .get();
-      LOG.info("requete acceptée");
 
       if (user == null) {
         if (request.role != User.Role.CHALLENGER) throw new BadRequestResponse();
       } else if (!user.hasRole(User.Role.ADMIN)) throw new BadRequestResponse();
-      LOG.info("requete valide");
       /* Encrypt Password*/
       String hash = BCrypt.with(new SecureRandom()).hashToString(6, request.password.toCharArray());
       /* Create new User */
@@ -84,26 +81,38 @@ public class UsersController implements CrudHandler {
         hash,
         request.role);
       try {
-        LOG.info("try - catch");
         if (newUser.hasRole(User.Role.CHALLENGER)) newUser.insert_challenger();
         else newUser.insert_manager(request.role);
-        LOG.info("Tout bon");
         ctx.status(HttpStatus.CREATED);
       } catch (SQLException e) {
         throw new InternalServerErrorResponse();
       }
     }
 
-    @OpenApi(path = "/users/{id}",
-            methods = HttpMethod.GET,
-            summary = "get a user",
-            operationId = "getOneUser",
-            tags = { "User" }, responses = {
-            @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User.class) })
+    @OpenApi(path = "/users/{userName}",
+      methods = HttpMethod.GET,
+      summary = "get a user",
+      operationId = "getOneUser",
+      tags = { "User" },
+      pathParams = {
+        @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+      },
+      responses = {
+        @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User.class) })
     })
-    public void getOne(Context ctx, String id) {
+    public void getOne(Context ctx, String name) {
         LOG.info("Je suis dans getOne");
-        throw new MethodNotAllowedResponse();
+        try {
+          User user = User.findByName(name);
+
+          if (user == null) throw new NotFoundResponse();
+
+          ctx.status(HttpStatus.OK);
+          ctx.json(user);
+
+        } catch (SQLException e) {
+          throw new InternalServerErrorResponse();
+        }
     }
 
     @OpenApi(path = "/users/{id}", methods = { HttpMethod.PUT,
