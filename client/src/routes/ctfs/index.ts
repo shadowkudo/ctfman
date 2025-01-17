@@ -1,4 +1,4 @@
-type Status = 'wip' | 'ready' | 'in progress' | 'finished';
+export type Status = 'wip' | 'ready' | 'in progress' | 'finished';
 
 interface Ctf {
 	owner: string;

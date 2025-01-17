@@ -139,8 +139,8 @@ public class CtfsController implements CrudHandler {
             rq.description.get(),
             rq.localisation.get(),
             rq.status.map(Ctf.Status::fromString).get(),
-            rq.start.get(),
-            rq.end.get());
+            rq.start.orElse(null),
+            rq.end.orElse(null));
 
     try {
       if (ctf.insert() != 1) {

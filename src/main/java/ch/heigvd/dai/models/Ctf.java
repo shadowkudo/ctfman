@@ -217,8 +217,8 @@ public class Ctf {
       stmt.setString(4, this.localisation);
 
       stmt.setObject(5, this.status.toString(), java.sql.Types.OTHER);
-      stmt.setTimestamp(6, Timestamp.from(this.startedAt));
-      stmt.setTimestamp(7, Timestamp.from(this.endedAt));
+      stmt.setTimestamp(6, this.startedAt != null ? Timestamp.from(this.startedAt) : null);
+      stmt.setTimestamp(7, this.endedAt != null ? Timestamp.from(this.endedAt) : null);
 
       return stmt.executeUpdate();
     }
