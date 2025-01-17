@@ -20,7 +20,7 @@
 				<Tabs.Trigger value="authors" class="grow text-center">Authors</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="info">
-				<Info team={data.ctf} isCaptain={data.ctf.owner == data.user?.name} />
+				<Info ctf={data.ctf} isOwner={data.ctf.owner == data.user?.name} />
 			</Tabs.Content>
 			<Tabs.Content value="challenges">
 				<Challenges challenges={[]} />

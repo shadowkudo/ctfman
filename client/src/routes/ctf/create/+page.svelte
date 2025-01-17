@@ -9,7 +9,7 @@
 	import Textarea from '$lib/components/ui/textarea/textarea.svelte';
 	import { useError } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
-	import { DateFormatter, type DateValue, getLocalTimeZone } from '@internationalized/date';
+	import { DateFormatter, type DateValue } from '@internationalized/date';
 	import { formatISO } from 'date-fns';
 
 	import type { Status } from '../../ctfs';
@@ -124,7 +124,7 @@
 				<div class="sm:col-span-2">
 					<Label for="country" class="block text-sm/6 font-medium text-gray-900">Country</Label>
 					<div class="mt-2 grid grid-cols-1">
-						<Select.Root type="single" bind:value={form.status}>
+						<Select.Root type="single" bind:value={form.status} required>
 							<Select.Trigger class="w-full" id="country">{statusSelectContent}</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="wip">Wip</Select.Item>
@@ -171,6 +171,7 @@
 							bind:value={form.description}
 							id="description"
 							name="description"
+							required
 							class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
 						/>
 					</div>
