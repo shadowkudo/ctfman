@@ -12,7 +12,7 @@
 	import { type DateValue } from '@internationalized/date';
 	import { formatISO } from 'date-fns';
 
-	import type { Status } from '../../ctfs';
+	import type { Status } from '$lib/data';
 
 	interface CreateForm {
 		title: string;

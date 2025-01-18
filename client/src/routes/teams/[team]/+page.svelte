@@ -9,6 +9,8 @@
 	}
 
 	let { data }: Props = $props();
+
+	const isCaptain = $derived(data.team.captain == data.user?.name);
 </script>
 
 <Card.Root class="flex flex-col">
@@ -20,13 +22,13 @@
 				<Tabs.Trigger value="ctfs" class="grow text-center">Ctfs</Tabs.Trigger>
 			</Tabs.List>
 			<Tabs.Content value="info">
-				<Info team={data.team} isCaptain={data.team.captain == data.user?.name} />
+				<Info team={data.team} {isCaptain} />
 			</Tabs.Content>
 			<Tabs.Content value="members">
 				<Members members={[]} />
 			</Tabs.Content>
 			<Tabs.Content value="ctfs">
-				<CTFs />
+				<CTFs ctfs={data.ctfs} team={data.team} {isCaptain} />
 			</Tabs.Content>
 		</Tabs.Root>
 	</Card.Content>
