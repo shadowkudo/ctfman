@@ -32,11 +32,11 @@ public class Router implements EndpointGroup {
         () -> {
           before(authMiddleware);
           path(
-              "/{teamName}",
+              "/{team-name}",
               () -> {
                 TeamsController teamsController = new TeamsController();
                 crud(teamsController);
-                put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
+                put(ctx -> teamsController.update(ctx, ctx.pathParam("team-name")));
               });
         });
 

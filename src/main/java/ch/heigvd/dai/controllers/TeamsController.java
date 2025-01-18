@@ -60,7 +60,7 @@ public class TeamsController implements CrudHandler {
       requestBody =
           @OpenApiRequestBody(
               required = true,
-              content = {@OpenApiContent(from = TeamCreateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(status = "201", description = "Resource created"),
         @OpenApiResponse(
@@ -85,8 +85,8 @@ public class TeamsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    TeamCreateRequest rq =
-        ctx.bodyValidator(TeamCreateRequest.class)
+    CreateRequest rq =
+        ctx.bodyValidator(CreateRequest.class)
             .check(x -> x.name != null && !x.name.isBlank(), "name is required")
             .check(x -> x.password != null && !x.password.isBlank(), "password is required")
             .get();
@@ -109,13 +109,13 @@ public class TeamsController implements CrudHandler {
   }
 
   @OpenApi(
-      path = "/teams/{teamName}",
+      path = "/teams/{team-name}",
       methods = HttpMethod.GET,
       summary = "get a team",
       operationId = "getOneTeam",
       tags = {"Team"},
       pathParams = {
-        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+        @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
       responses = {
         @OpenApiResponse(
@@ -149,13 +149,13 @@ public class TeamsController implements CrudHandler {
   }
 
   @OpenApi(
-      path = "/teams/{teamName}",
+      path = "/teams/{team-name}",
       methods = {HttpMethod.PUT, HttpMethod.PATCH},
       summary = "update a team",
       operationId = "updateTeam",
       tags = {"Team"},
       pathParams = {
-        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+        @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
       requestBody =
           @OpenApiRequestBody(
@@ -163,7 +163,7 @@ public class TeamsController implements CrudHandler {
                   "When using PUT, all fields are required. When using PATCH, fields can be omitted"
                       + " in which case they will keep their current value",
               required = true,
-              content = {@OpenApiContent(from = TeamCreateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -188,7 +188,7 @@ public class TeamsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    BodyValidator<TeamUpdateRequest> validator = ctx.bodyValidator(TeamUpdateRequest.class);
+    BodyValidator<UpdateRequest> validator = ctx.bodyValidator(UpdateRequest.class);
 
     if (isPatch) { // PATCH
       // name: omit/not blank
@@ -214,7 +214,7 @@ public class TeamsController implements CrudHandler {
           .check(it -> it.country != null, "PUT: country is required (nullable)");
     }
 
-    TeamUpdateRequest rq = validator.get();
+    UpdateRequest rq = validator.get();
 
     LOG.debug(rq.toString());
 
@@ -264,13 +264,13 @@ public class TeamsController implements CrudHandler {
   }
 
   @OpenApi(
-      path = "/teams/{teamName}",
+      path = "/teams/{team-name}",
       methods = HttpMethod.DELETE,
       summary = "delete a team",
       operationId = "deleteTeam",
       tags = {"Team"},
       pathParams = {
-        @OpenApiParam(name = "teamName", type = String.class, description = "The team name")
+        @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
       responses = {
         @OpenApiResponse(status = "204", description = "Successfully deleted resource"),
@@ -312,12 +312,39 @@ public class TeamsController implements CrudHandler {
     }
   }
 
-  public static record TeamCreateRequest(
-      String name, String password, String description, String country) {}
+  @OpenApiName("TeamCreateRequest")
+  public static record CreateRequest(
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "Team 1")
+          @OpenApiRequired()
+          String name,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "password")
+          @OpenApiRequired()
+          String password,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "description")
+          @OpenApiRequired()
+          @OpenApiNullable()
+          String description,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "Switzerland")
+          @OpenApiRequired()
+          @OpenApiNullable()
+          String country) {}
 
-  public static record TeamUpdateRequest(
-      Optional<String> name,
-      Optional<String> password,
-      Optional<String> description,
-      Optional<String> country) {}
+  @OpenApiName("TeamUpdateRequest")
+  public static record UpdateRequest(
+      @OpenApiPropertyType(definedBy = String.class) @OpenApiExample(value = "Team 1")
+          Optional<String> name,
+      @OpenApiPropertyType(definedBy = String.class) @OpenApiExample(value = "password")
+          Optional<String> password,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "description")
+          @OpenApiNullable()
+          Optional<String> description,
+      @OpenApiPropertyType(definedBy = String.class)
+          @OpenApiExample(value = "Switzerland")
+          @OpenApiNullable()
+          Optional<String> country) {}
 }
