@@ -5,7 +5,7 @@
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
 	import { ChevronRightIcon, SettingsIcon, Trash2Icon } from 'lucide-svelte';
-	import type { Ctf } from '.';
+	import type { Ctf } from '$lib/data';
 	import { useError } from '$lib/utils';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
