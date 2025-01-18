@@ -5,6 +5,7 @@ import static io.javalin.apibuilder.ApiBuilder.*;
 import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.CtfsController;
 import ch.heigvd.dai.controllers.TeamsController;
+import ch.heigvd.dai.controllers.TeamsCtfsController;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
 import io.javalin.apibuilder.EndpointGroup;
@@ -37,6 +38,13 @@ public class Router implements EndpointGroup {
                 TeamsController teamsController = new TeamsController();
                 crud(teamsController);
                 put(ctx -> teamsController.update(ctx, ctx.pathParam("team-name")));
+                path(
+                    "/ctfs",
+                    () -> {
+                      TeamsCtfsController teamsCtfsController = new TeamsCtfsController();
+                      get(ctx -> teamsCtfsController.getAll(ctx, ctx.pathParam("team-name")));
+                      post(ctx -> teamsCtfsController.create(ctx, ctx.pathParam("team-name")));
+                    });
               });
         });
 

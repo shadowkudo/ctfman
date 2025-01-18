@@ -171,12 +171,41 @@ public class Ctf {
         res.getTimestamp("ended_at"));
   }
 
+  public static boolean exists(String title) throws SQLException {
+    String query = "SELECT title FROM ctf WHERE title = ? LIMIT 1";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, title);
+      ResultSet res = stmt.executeQuery();
+
+      return res.next();
+    }
+  }
+
   public static List<Ctf> getAll() throws SQLException {
     List<Ctf> ctfs = new ArrayList<>();
     String query = "SELECT * FROM ctf";
 
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
+      ResultSet res = stmt.executeQuery();
+
+      while (res.next()) {
+        ctfs.add(fromResultSet(res));
+      }
+    }
+
+    return ctfs;
+  }
+
+  public static List<Ctf> getAllByTeam(String team) throws SQLException {
+    List<Ctf> ctfs = new ArrayList<>();
+    String query =
+        "SELECT ctf.* FROM ctf JOIN team_sign_up_to_ctf t ON t.ctf = ctf.title WHERE t.team = ?";
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, team);
       ResultSet res = stmt.executeQuery();
 
       while (res.next()) {
