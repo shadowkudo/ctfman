@@ -44,6 +44,17 @@ public class Router implements EndpointGroup {
                       TeamsCtfsController teamsCtfsController = new TeamsCtfsController();
                       get(ctx -> teamsCtfsController.getAll(ctx, ctx.pathParam("team-name")));
                       post(ctx -> teamsCtfsController.create(ctx, ctx.pathParam("team-name")));
+
+                      path(
+                          "/{ctf-title}",
+                          () -> {
+                            get(
+                                ctx ->
+                                    teamsCtfsController.getOne(
+                                        ctx,
+                                        ctx.pathParam("team-name"),
+                                        ctx.pathParam("ctf-title")));
+                          });
                     });
               });
         });

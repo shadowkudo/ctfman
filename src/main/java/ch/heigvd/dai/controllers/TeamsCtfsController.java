@@ -148,6 +148,52 @@ public class TeamsCtfsController {
     }
   }
 
+  @OpenApi(
+      path = "/teams/{team-name}/ctfs/{ctf-title}",
+      methods = HttpMethod.GET,
+      summary = "get the ctf details",
+      operationId = "getOneTeamCTF",
+      tags = {"CTF", "Team"},
+      pathParams = {
+        @OpenApiParam(name = "team-name", type = String.class, description = "The team name"),
+        @OpenApiParam(name = "ctf-title", type = String.class, description = "The ctf title")
+      },
+      responses = {
+        @OpenApiResponse(
+            status = "200",
+            description = "The ctf details",
+            content = @OpenApiContent(from = Ctf.class, type = ContentType.JSON)),
+        @OpenApiResponse(
+            status = "404",
+            description = "No ctf with this title",
+            content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)),
+        @OpenApiResponse(
+            status = "401",
+            description = "User not authenticated",
+            content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)),
+        @OpenApiResponse(status = "302", description = "Redirecting to the actual ctf")
+      })
+  public void getOne(Context ctx, String teamName, String ctfTitle) {
+
+    try {
+      Team team = Team.getByName(teamName);
+
+      if (team == null) {
+        throw new NotFoundResponse("Team not found");
+      }
+
+      List<Ctf> ctfs = Ctf.getAllByTeam(teamName);
+      if (ctfs.stream().noneMatch(c -> c.getTitle().equals(ctfTitle))) {
+        throw new NotFoundResponse("Ctf not found");
+      }
+
+      ctx.redirect("/ctfs/" + ctfTitle, HttpStatus.FOUND);
+    } catch (SQLException e) {
+      LOG.error(e.toString());
+      throw new InternalServerErrorResponse();
+    }
+  }
+
   @OpenApiName("TeamsCtfsUpdateRequest")
   public static record CreateRequest(
       @OpenApiPropertyType(definedBy = String.class)
