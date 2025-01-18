@@ -15,6 +15,7 @@ import io.javalin.validation.BodyValidator;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,6 +125,10 @@ public class TeamsCtfsController {
 
       if (ctf == null) {
         throw new NotFoundResponse("associated ctf not found");
+      }
+
+      if (Stream.of(Ctf.Status.READY, Ctf.Status.IN_PROGRESS).noneMatch(ctf.getStatus()::equals)) {
+        throw new ForbiddenResponse("Cannot join a ctf that isn't marked as ready or in progress");
       }
 
       if (team.joinCtf(req.ctf.get()) != 1) {
