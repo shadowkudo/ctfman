@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
 	import { PUBLIC_BACKEND_URL } from '$env/static/public';
 	import Button from '$lib/components/ui/button/button.svelte';
@@ -11,66 +12,87 @@
 	import { toast } from 'svelte-sonner';
 	import { type DateValue } from '@internationalized/date';
 	import { formatISO } from 'date-fns';
+	import type { Status } from '../..';
 
-	import type { Status } from '../../ctfs';
+	interface Props {
+		data: PageData;
+	}
 
-	interface CreateForm {
+	interface UpdateForm {
 		title: string;
 		description: string;
 		localisation: string;
 		status: Status;
-		start?: DateValue;
-		end?: DateValue;
+		start?: string;
+		end?: string;
 	}
 
 	interface Payload {
-		title: string;
-		description: string;
-		localisation: string;
-		status: Status;
-		start: string | null;
-		end: string | null;
+		title?: string;
+		description?: string;
+		localisation?: string;
+		status?: Status;
+		start?: string | null;
+		end?: string | null;
 	}
 
-	let form: CreateForm = $state({
-		title: '',
-		description: '',
-		localisation: '',
-		status: 'wip'
+	const { data }: Props = $props();
+
+	let form: UpdateForm = $state({
+		title: data.ctf.title,
+		description: data.ctf.description,
+		localisation: data.ctf.localisation,
+		status: data.ctf.status,
+		start: data.ctf.startedAt?.toISOString()?.slice(0, 16),
+		end: data.ctf.endedAt?.toISOString()?.slice(0, 16)
 	});
 
 	async function submit(e: Event) {
 		e.preventDefault();
 
-		const payload: Payload = {
-			...form,
-			start: form.start ? formatISO(form.start.toString()) : null,
-			end: form.end ? formatISO(form.end.toString()) : null
+		let payload: Payload = {
+			title: form.title != data.ctf.title ? form.title : undefined,
+			description: form.description != data.ctf.description ? form.description : undefined,
+			localisation: form.localisation != data.ctf.localisation ? form.localisation : undefined,
+			status: form.status != data.ctf.status ? form.status : undefined,
+			start:
+				form.start == data.ctf.startedAt?.toISOString()?.slice(0, 16)
+					? undefined
+					: form.start == ''
+						? null
+						: formatISO(form.start ?? ''),
+			end:
+				form.end == data.ctf.endedAt?.toISOString()?.slice(0, 16)
+					? undefined
+					: form.end == ''
+						? null
+						: formatISO(form.end ?? '')
 		};
 
-		let res = await fetch(`${PUBLIC_BACKEND_URL}/ctfs`, {
-			method: 'POST',
+		let res = await fetch(`${PUBLIC_BACKEND_URL}/ctfs/${data.ctf.title}`, {
+			method: 'PATCH',
 			body: JSON.stringify(payload),
 			credentials: 'include'
 		});
 
 		switch (res.status) {
-			case 201:
+			case 200:
 				break;
 			case 401:
-				useError(401);
+			case 403:
+				useError(res.status);
 			case 409:
-				toast.error('Error while creating ctf', {
+				toast.error('Error while updating ctf', {
 					description: 'A ctf already exists with this name'
 				});
 				return;
 			default:
-				console.error(`create: unexpected response status: ${res.status}`);
+				console.error(`/ctfs/[ctf]/edit: unexpected response status: ${res.status}`);
 				return;
 		}
 
-		toast.success('success', { description: 'redirecting to the new ctf' });
-		await goto(`/ctfs/${form.title}`, { invalidateAll: true });
+		toast.success('success', { description: 'redirecting to the updated ctf' });
+		goto(`/ctfs/${form.title}`);
 	}
 
 	const statusSelectContent = $derived(form.status.length ? form.status : 'Select a status');
@@ -78,8 +100,8 @@
 
 <Card.Root>
 	<Card.Header>
-		<Card.Title>Create</Card.Title>
-		<Card.Description>Create a ctf</Card.Description>
+		<Card.Title>Edit</Card.Title>
+		<Card.Description>Edit CTF: {data.ctf.title}</Card.Description>
 	</Card.Header>
 	<Card.Content>
 		<form
@@ -173,7 +195,7 @@
 					</div>
 				</div>
 			</div>
-			<Button type="submit">Create</Button>
+			<Button type="submit">Save</Button>
 		</form>
 	</Card.Content>
 </Card.Root>

@@ -60,7 +60,7 @@ public class TeamsController implements CrudHandler {
       requestBody =
           @OpenApiRequestBody(
               required = true,
-              content = {@OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = TeamCreateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(status = "201", description = "Resource created"),
         @OpenApiResponse(
@@ -85,8 +85,8 @@ public class TeamsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    CreateRequest rq =
-        ctx.bodyValidator(CreateRequest.class)
+    TeamCreateRequest rq =
+        ctx.bodyValidator(TeamCreateRequest.class)
             .check(x -> x.name != null && !x.name.isBlank(), "name is required")
             .check(x -> x.password != null && !x.password.isBlank(), "password is required")
             .get();
@@ -163,7 +163,7 @@ public class TeamsController implements CrudHandler {
                   "When using PUT, all fields are required. When using PATCH, fields can be omitted"
                       + " in which case they will keep their current value",
               required = true,
-              content = {@OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)}),
+              content = {@OpenApiContent(from = TeamCreateRequest.class, type = ContentType.JSON)}),
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -188,7 +188,7 @@ public class TeamsController implements CrudHandler {
       throw new ForbiddenResponse();
     }
 
-    BodyValidator<UpdateRequest> validator = ctx.bodyValidator(UpdateRequest.class);
+    BodyValidator<TeamUpdateRequest> validator = ctx.bodyValidator(TeamUpdateRequest.class);
 
     if (isPatch) { // PATCH
       // name: omit/not blank
@@ -214,7 +214,7 @@ public class TeamsController implements CrudHandler {
           .check(it -> it.country != null, "PUT: country is required (nullable)");
     }
 
-    UpdateRequest rq = validator.get();
+    TeamUpdateRequest rq = validator.get();
 
     LOG.debug(rq.toString());
 
@@ -312,10 +312,10 @@ public class TeamsController implements CrudHandler {
     }
   }
 
-  public static record CreateRequest(
+  public static record TeamCreateRequest(
       String name, String password, String description, String country) {}
 
-  public static record UpdateRequest(
+  public static record TeamUpdateRequest(
       Optional<String> name,
       Optional<String> password,
       Optional<String> description,

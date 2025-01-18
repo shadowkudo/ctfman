@@ -35,6 +35,7 @@ services:
       DB_USER: "${PG_USER:-ctfman}"
       DB_PASS: "${PG_PASS:-ctfman}"
       DB_HOST: "${DB_HOST:-db}"
+      ALLOWED_ORIGINS: "*"
     command: "serve --port 8080"
   db:
     profiles:
