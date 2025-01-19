@@ -111,7 +111,8 @@ INSERT INTO challenge (title, ctf, author, moderator, difficulty, score, flag) V
 -- Insert data into the `challenge_category` table
 INSERT INTO challenge_category (category, challenge) VALUES
 ('crypto', 'Challenge 1'),
-('password', 'Challenge 2');
+('password', 'Challenge 2'),
+('osint', 'I am lost');
 
 -- Insert data into the `vulnerability` table
 INSERT INTO vulnerability (cve, description) VALUES

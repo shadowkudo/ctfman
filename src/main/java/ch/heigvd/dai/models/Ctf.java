@@ -3,6 +3,7 @@ package ch.heigvd.dai.models;
 import ch.heigvd.dai.db.DB;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.javalin.openapi.OpenApiExample;
+import io.javalin.openapi.OpenApiName;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,7 @@ public class Ctf {
   @Nullable private Instant endedAt;
   private String oldTitle;
 
+  @OpenApiName("CtfStatus")
   public static enum Status {
     WIP("wip"),
     READY("ready"),
@@ -256,7 +258,7 @@ public class Ctf {
   public int update() throws SQLException {
     String query =
         "UPDATE ctf SET title = ?, description = ?, admin = ?, localisation = ?, started_at = ?,"
-            + " ended_at = ? WHERE title = ?";
+            + " ended_at = ?, status = ? WHERE title = ?";
 
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
@@ -267,7 +269,8 @@ public class Ctf {
       stmt.setString(4, localisation);
       stmt.setTimestamp(5, Optional.ofNullable(startedAt).map(Timestamp::from).orElse(null));
       stmt.setTimestamp(6, Optional.ofNullable(endedAt).map(Timestamp::from).orElse(null));
-      stmt.setString(7, oldTitle);
+      stmt.setObject(7, this.status.toString(), java.sql.Types.OTHER);
+      stmt.setString(8, oldTitle);
 
       return stmt.executeUpdate();
     }
