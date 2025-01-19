@@ -68,7 +68,13 @@
 							{#if page.route.id?.startsWith('/ctfs/[ctf]')}
 								<Breadcrumb.Separator class="hidden md:block" />
 								<Breadcrumb.Item>
-									<Breadcrumb.Page>[]</Breadcrumb.Page>
+									{#if page.route.id == '/ctfs/[ctf]'}
+										<Breadcrumb.Page>{page.params?.ctf}</Breadcrumb.Page>
+									{:else}
+										<Breadcrumb.Link href={`/ctfs/${page.params?.ctf}`}>
+											{page.params?.ctf}
+										</Breadcrumb.Link>
+									{/if}
 								</Breadcrumb.Item>
 							{/if}
 						{/if}

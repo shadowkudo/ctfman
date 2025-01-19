@@ -79,6 +79,29 @@ public class Team extends Authentication {
     this.captain = captain;
   }
 
+  public static boolean exists(String name) throws SQLException {
+    String query = "SELECT authentication FROM team WHERE authentication = ? LIMIT 1";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, name);
+      ResultSet res = stmt.executeQuery();
+
+      return res.next();
+    }
+  }
+
+  public int joinCtf(String ctf) throws SQLException {
+    String query = "INSERT INTO team_sign_up_to_ctf(team, ctf) VALUES(?, ?)";
+
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setString(1, oldAuthentication);
+      stmt.setString(2, ctf);
+      return stmt.executeUpdate();
+    }
+  }
+
   public static List<Team> getAll() throws SQLException {
     return getAll(true);
   }
