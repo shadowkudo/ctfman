@@ -115,7 +115,7 @@ $$;
 
 --NOTE: Triggers
 
--- TODO: challenger_in_team one captain (if only the captain remains and then
+-- challenger_in_team one captain (if only the captain remains and then
 -- decides to leave, the relationship shouldn't be removed, instead we will set
 -- the deleted_at value.)
 
@@ -142,30 +142,95 @@ CREATE CONSTRAINT TRIGGER check_team_captain_after_insert
   EXECUTE PROCEDURE check_team_captain_after_insert();
 
 
--- TODO: challenger_in_team logs automatically created
+-- challenger_in_team logs automatically created
+DROP FUNCTION IF EXISTS manage_team_quit_and_join CASCADE;
+CREATE FUNCTION manage_team_quit_and_join()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO challenger_in_team_logs (challenger, team, event)
+        VALUES (NEW.challenger, NEW.team, 'joined'::challenger_team_event);
+RETURN NEW;
+ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO challenger_in_team_logs (challenger, team, event)
+        VALUES (OLD.challenger, OLD.team, 'left'::challenger_team_event);
+RETURN OLD;
+END IF;
+    RAISE 'Error logging challenger_in_team arrival or departure'; -- This code should never be reached
+RETURN NULL;
+END;
+$$;
 
--- TODO: ctf date check (end after start and not before) (create/update)
+DROP TRIGGER IF EXISTS challenger_in_team_log ON challenger_in_team CASCADE;
+CREATE TRIGGER challenger_in_team_log
+    BEFORE INSERT OR DELETE ON challenger_in_team
+    FOR EACH ROW
+    EXECUTE FUNCTION manage_team_quit_and_join();
 
--- TODO: challenge needs at least one category
+-- ctf date check (end after start and not before) (create/update)
+DROP FUNCTION IF EXISTS check_dates CASCADE;
+CREATE FUNCTION check_dates()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS $$
+BEGIN
+    IF NEW.ended_at IS NOT NULL AND NEW.ended_at < NEW.started_at THEN
+        RAISE 'ended_at can not be before strated_at';
+END IF;
+RETURN NEW;
+END;
+$$;
 
--- TODO: vulnerability requires at least one challenge
+DROP TRIGGER IF EXISTS ctf_date_check ON ctf CASCADE;
+CREATE CONSTRAINT TRIGGER ctf_date_check
+    AFTER INSERT OR UPDATE OF started_at, ended_at ON ctf
+    DEFERRABLE
+    FOR EACH ROW
+    EXECUTE FUNCTION check_dates();
 
--- TODO: team can't join a ctf unless the ctf status is 'ready' or 'in progress'
+-- challenge needs at least one category
+DROP FUNCTION IF EXISTS check_categories CASCADE;
+CREATE FUNCTION check_categories()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS $$
+BEGIN
+    IF 1 > (
+        SELECT COUNT(*) FROM challenge_category cc
+        WHERE NEW.title = cc.challenge
+    ) THEN RAISE 'the challenge has no categories';
+END IF;
+RETURN NEW;
+END;
+$$;
 
--- TODO: total score penalty of hints can't be higher than the amount of points
--- available for the challenge (create/update)
+DROP TRIGGER IF EXISTS challenge_categories_check ON challenge CASCADE;
+CREATE CONSTRAINT TRIGGER challenge_categories_check
+    AFTER INSERT ON challenge
+    DEFERRABLE
+    FOR EACH ROW
+    EXECUTE FUNCTION check_categories();
 
--- TODO: tool should have at least one platform
+-- vulnerability requires at least one challenge
+DROP FUNCTION IF EXISTS check_vulnerabilities CASCADE;
+CREATE FUNCTION check_vulnerabilities()
+    RETURNS TRIGGER
+    LANGUAGE plpgsql AS $$
+BEGIN
+    IF 1 > (
+        SELECT COUNT(*) FROM challenge_has_vulnerability cv
+        WHERE NEW.cve = cv.vulnerability
+    ) THEN RAISE 'the vulnerability has no challenge';
+END IF;
+RETURN NEW;
+END;
+$$;
 
--- TODO: tags should be deleted once there are no comments linking to it
-
--- TODO: sub comments should have the same challenge as their parent
-
--- TODO: a hint/challenger association shouldn't be allowed if both challengers
--- are on the same team (only one challenger of the team can use a hint, then it unlocks for the whole team).
-
--- TODO: a challenger cannot leave a team while the team is signed up to an
--- active ctf (so while ctf.status != finished)
+DROP TRIGGER IF EXISTS challenge_vulnerabilities_check ON challenge CASCADE;
+CREATE CONSTRAINT TRIGGER challenge_vulnerabilities_check
+    AFTER INSERT ON vulnerability
+    DEFERRABLE
+    FOR EACH ROW
+    EXECUTE FUNCTION check_vulnerabilities();
 
 COMMIT;
 ROLLBACK;
