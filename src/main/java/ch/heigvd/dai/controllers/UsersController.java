@@ -162,13 +162,44 @@ public class UsersController implements CrudHandler {
       pathParams = {
       @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },
-      requestBody =
-      @OpenApiRequestBody(
+      requestBody = @OpenApiRequestBody(
         description =
           "When using PUT, all fields are required. When using PATCH, fields can be omitted"
             + " in which case they will keep their current value",
         required = true,
-        content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)})
+        content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)}
+      ),
+      responses = {
+        @OpenApiResponse(
+          status = "200",
+          description = "Successful changes",
+          content = @OpenApiContent(from = User.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "400",
+          description = "Invalid request"
+        ),
+        @OpenApiResponse(
+          status = "401",
+          description = "Only authenticated user can modifiy user",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "403",
+          description = "No permission to modify the user",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "404",
+          description = "The user to modify was not found",
+          content = @OpenApiContent(from = ErrorResponse.class, type = io.javalin.http.ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "500",
+          description = "The server encountered an issue",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        )
+      }
     )
     public void update(Context ctx, String name) {
       boolean isPatch = ctx.method().equals(HandlerType.PATCH);
@@ -178,10 +209,11 @@ public class UsersController implements CrudHandler {
       try {
         userToModifiy = User.findByName(name);
         if (userToModifiy == null) throw new NotFoundResponse();
-      } catch (SQLException e) { throw new InternalServerErrorResponse(); }
-
-      if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
-
+      } catch (SQLException e) {
+        LOG.error(e.toString());
+        throw new InternalServerErrorResponse();
+      }
+      if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new ForbiddenResponse();
       UpdateRequest ur;
       if (!isPatch) {
         ur = ctx.bodyValidator(UpdateRequest.class)
@@ -191,20 +223,15 @@ public class UsersController implements CrudHandler {
             && !x.email.isBlank(), "Email can't be empty on PUT")
           .get();
       } else ur = ctx.bodyValidator(UpdateRequest.class).get();
-
       if (ur.password != null) {
-        String hash = BCrypt.with(
-          new SecureRandom())
-          .hashToString(6, ur.password.toCharArray());
+        userToModifiy.setPasswordHash(BCrypt.with(new SecureRandom()).hashToString(6, ur.password.toCharArray()));
       }
-
-      if (ur.email != null) {
-        userToModifiy.setPrimaryContact(ur.email); }
-
+      if (ur.email != null) userToModifiy.setPrimaryContact(ur.email);
       try {
         if (!userToModifiy.update()) throw new InternalServerErrorResponse();
         ctx.json(userToModifiy);
       } catch (SQLException e) {
+        LOG.error(e.toString());
         throw new InternalServerErrorResponse();
       }
     }
