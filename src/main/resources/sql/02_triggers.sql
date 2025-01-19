@@ -218,7 +218,7 @@ CREATE FUNCTION check_vulnerabilities()
 BEGIN
     IF 1 > (
         SELECT COUNT(*) FROM challenge_has_vulnerability cv
-        WHERE NEW.challenge = cv.challenge
+        WHERE NEW.title = cv.challenge
     ) THEN RAISE 'the challenge has no vulnerabilities';
 END IF;
 RETURN NEW;
@@ -233,23 +233,6 @@ CREATE CONSTRAINT TRIGGER challenge_vulnerabilities_check
     EXECUTE FUNCTION check_vulnerabilities();
 
 -- team can't join a ctf unless the ctf status is 'ready' or 'in progress'
-DROP FUNCTION IF EXISTS check_ctf_status CASCADE;
-CREATE FUNCTION check_ctf_status()
-    RETURNS TRIGGER
-    LANGUAGE plpgsql AS $$
-BEGIN
-IF NOT EXISTS (
-    SELECT * FROM ctf WHERE title = new.ctf AND status IN ('ready', 'in progress')
-) THEN RAISE EXCEPTION 'cant join a wip or finished ctf';
-END IF;
-RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS check_ctf_status_trigger ON team_sign_up_to_ctf CASCADE;
-CREATE TRIGGER check_ctf_status_trigger
-    BEFORE INSERT ON team_sign_up_to_ctf
-    EXECUTE FUNCTION check_ctf_status();
 
 COMMIT;
 ROLLBACK;
