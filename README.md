@@ -249,7 +249,7 @@ Add an A record to the DNS zone of your domain name provider to point to the IP 
 
 Add a second wildcard A record to the DNS zone of your domain name provider to point to the IP address of the virtual machine. This will allow access to all your services hosted under a subdomain of your domain name.
 
-![dns_zone](./presentation_assets/dns_zone.png)
+![dns_zone](./assets/dns_zone.png)
 
 #### Validation
 
@@ -288,7 +288,7 @@ Address:	192.168.247.244#53
 With `Swagger`, documentation is created during coding; see the endpoint `https://api.ctfman.cybernest.ch/swagger` or `https://api.ctfman.cybernest.ch/redoc` to look at the API documentation.
 
 > [!NOTE]
-> It is recommended to use `swagger` as you can try the api.
+> It is recommended to use `swagger` as you can try the API easily.
 
 <!-- USAGE -->
 #### Usage
@@ -351,6 +351,9 @@ curl -X 'GET' \
   -H 'Cookie: HTOsOvSX0eEPXaAwy76Zjwjaadim9bWeD4-DkOMVjqg'
 ```
 
+> [!IMPORTANT]
+> As seen here, you need to add the cookie from the login response to all the future request as you need to be logged in to access other information. The only exception would be to logout as it will not give confidential information.
+
 Will get:
 
 ```sh
@@ -371,11 +374,6 @@ curl -i -X 'POST' \
   -d ''
 ```
 
-TODO: add other curl examples
-
-> [!NOTE]
-> Should normally have the cookie but works also without.
-
 Will get:
 
 ```sh
@@ -386,11 +384,43 @@ expires: Thu, 01 Jan 1970 00:00:00 GMT
 set-cookie: session=; Path=/; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Max-Age=0
 ```
 
+> [!NOTE]
+> I think with those examples, you understood how it works. For others endpoints it will work the same way; be careful to never forget the cookie in the request !
+
 #### Examples using the UI on a web browser
 
 The following examples have been made with [Firefox][firefox].
 
-TODO
+Login:
+
+![login](./assets/login_field.png)
+
+Logout:
+
+![logout](./assets/logout.png)
+
+Navigation:
+
+![navigation](./assets/navigation.png)
+
+List teams:
+
+![list_team](./assets/list_teams.png)
+
+Edit team:
+
+![edit_team](./assets/edit_team.png)
+
+Create team:
+
+![create_team](./assets/create_team_full.png)
+
+Team details:
+
+![team_details](./assets/detail_team.png)
+
+> [!NOTE]
+> It will work the same way for other field like CTF.
 
 <!-- CONTRIBUTING -->
 
