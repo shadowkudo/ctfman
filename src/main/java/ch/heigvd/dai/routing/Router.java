@@ -73,7 +73,7 @@ public class Router implements EndpointGroup {
               });
         });
     path(
-      "/users/{id}",
+      "/users/{user-name}",
       () -> {
         UsersController usersController = new UsersController();
         crud(usersController);
