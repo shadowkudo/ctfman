@@ -118,10 +118,10 @@
 				</div>
 
 				<div class="sm:col-span-2">
-					<Label for="country" class="block text-sm/6 font-medium text-gray-900">Country</Label>
+					<Label for="status" class="block text-sm/6 font-medium text-gray-900">Status</Label>
 					<div class="mt-2 grid grid-cols-1">
 						<Select.Root type="single" bind:value={form.status} required>
-							<Select.Trigger class="w-full" id="country">{statusSelectContent}</Select.Trigger>
+							<Select.Trigger class="w-full" id="status">{statusSelectContent}</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="wip">Wip</Select.Item>
 								<Select.Item value="ready">Ready</Select.Item>
