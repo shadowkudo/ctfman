@@ -87,34 +87,34 @@ public class User extends Authentication {
     List<User> list = new ArrayList<>();
     /* Create the query to get the role asked */
     String query = switch (role) {
-        case ADMIN -> "SELECT au.identification " +
-                " FROM admin a " +
-                " JOIN authentication au ON a.manager = au.identification " +
-                " WHERE au.deleted_at IS NULL;";
-        case MODERATOR -> "SELECT au.identification " +
-                " FROM moderator m " +
-                " JOIN authentication au ON m.manager = au.identification " +
-                " WHERE au.deleted_at IS NULL;";
-        case AUTHOR -> "SELECT au.identification " +
-                " FROM author a " +
-                " JOIN authentication au ON a.manager = au.identification " +
-                " WHERE au.deleted_at IS NULL;";
-        case CHALLENGER -> "SELECT au.identification " +
-                " FROM challenger ch " +
-                " JOIN authentication au ON ch.user_account = au.identification " +
-                " WHERE au.deleted_at IS NULL;";
-        case ALL -> "SELECT au.identification" +
-                " FROM user_account ua" +
-                " JOIN authentication au ON au.identification = ua.authentication" +
-                " WHERE au.deleted_at IS NULL;";
-        default -> throw new NotFoundResponse();
+      case ADMIN -> "SELECT au.identification " +
+        " FROM admin a " +
+        " JOIN authentication au ON a.manager = au.identification " +
+        " WHERE au.deleted_at IS NULL;";
+      case MODERATOR -> "SELECT au.identification " +
+        " FROM moderator m " +
+        " JOIN authentication au ON m.manager = au.identification " +
+        " WHERE au.deleted_at IS NULL;";
+      case AUTHOR -> "SELECT au.identification " +
+        " FROM author a " +
+        " JOIN authentication au ON a.manager = au.identification " +
+        " WHERE au.deleted_at IS NULL;";
+      case CHALLENGER -> "SELECT au.identification " +
+        " FROM challenger ch " +
+        " JOIN authentication au ON ch.user_account = au.identification " +
+        " WHERE au.deleted_at IS NULL;";
+      case ALL -> "SELECT au.identification" +
+        " FROM user_account ua" +
+        " JOIN authentication au ON au.identification = ua.authentication" +
+        " WHERE au.deleted_at IS NULL;";
+      default -> throw new NotFoundResponse();
     };
 
-      try (Connection conn = DB.getConnection()) {
+    try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
+      LOG.info(stmt.toString());
       ResultSet res = stmt.executeQuery();
-
-        while (res.next()) list.add(findByName(res.getString("identification")));
+      while (res.next()) list.add(findByName(res.getString("identification")));
     }
     return list;
   }
@@ -127,8 +127,7 @@ public class User extends Authentication {
     stmt.setString(2, this.passwordHash);
     stmt.setString(3, this.primaryContact);
     LOG.info(stmt.toString());
-
-      stmt.executeUpdate();
+    stmt.executeUpdate();
     }
   }
 
@@ -156,7 +155,6 @@ public class User extends Authentication {
           stmt.setBoolean(6, true);
       }
       LOG.info(stmt.toString());
-
       stmt.executeUpdate();
     }
 
@@ -175,12 +173,7 @@ public class User extends Authentication {
       PreparedStatement stmt = cnt.prepareStatement(updatePassword);
       stmt.setString(1, this.passwordHash);
       stmt.setString(2, this.authentication);
-
-      LOG.info("Change password");
       LOG.info(stmt.toString());
-      LOG.info(this.authentication);
-      LOG.info(this.passwordHash);
-
       if (stmt.executeUpdate() != 1) {
         LOG.info("Failed change password");
         cnt.rollback();
@@ -190,10 +183,8 @@ public class User extends Authentication {
       stmt = cnt.prepareStatement(updatePrimaryContactContact);
       stmt.setString(1, this.primaryContact);
       stmt.setString(2, this.authentication);
-      LOG.info("Change Contact");
       LOG.info(stmt.toString());
       if (stmt.executeUpdate() != 1) {
-        LOG.info("Failed contact");
         cnt.rollback();
         return false;
       }
@@ -201,16 +192,13 @@ public class User extends Authentication {
       stmt = cnt.prepareStatement(updatePrimaryContactUserAccount);
       stmt.setString(1, this.primaryContact);
       stmt.setString(2, this.authentication);
-      LOG.info("Change Account");
       LOG.info(stmt.toString());
       if (stmt.executeUpdate() != 1) {
-        LOG.info("Failed account");
         cnt.rollback();
         return false;
       }
       cnt.commit();
     }
-    LOG.info("All good");
     return true;
   }
 
@@ -266,9 +254,8 @@ public class User extends Authentication {
     return switch (role) {
       case ADMIN -> isAdmin;
       case AUTHOR -> isAuthor;
-      case CHALLENGER -> isChallenger;
+      case CHALLENGER, ALL -> isChallenger;
       case MODERATOR -> isModerator;
-      case ALL -> isChallenger;
     };
   }
 
@@ -280,6 +267,7 @@ public class User extends Authentication {
       stmt.setTimestamp(1, deleteTime);
       stmt.setString(2, authentication);
       deletedAt = deleteTime;
+      LOG.info(stmt.toString());
       if (stmt.executeUpdate() != 1) {
         deletedAt = null;
         return false;
