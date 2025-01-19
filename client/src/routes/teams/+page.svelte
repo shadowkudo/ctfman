@@ -53,8 +53,8 @@
 		{#each data.teams as team (team.name)}
 			<Table.Row>
 				<Table.Cell class="font-medium">{team.name}</Table.Cell>
-				<Table.Cell class="text-ellipsis">{team.country}</Table.Cell>
-				<Table.Cell>{team.description}</Table.Cell>
+				<Table.Cell>{team.country}</Table.Cell>
+				<Table.Cell class="truncate">{team.description}</Table.Cell>
 				<Table.Cell>{team.captain}</Table.Cell>
 				<Table.Cell class="flex flex-row justify-end gap-2">
 					{#if data.user?.name == team.captain}

@@ -1,14 +1,8 @@
 package ch.heigvd.dai.commands;
 
-import static io.javalin.apibuilder.ApiBuilder.crud;
-import static io.javalin.apibuilder.ApiBuilder.path;
-import static io.javalin.apibuilder.ApiBuilder.put;
-
-import ch.heigvd.dai.controllers.AuthController;
-import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.db.DB;
-import ch.heigvd.dai.middlewares.AuthMiddleware;
-import ch.heigvd.dai.middlewares.SessionMiddleware;
+import ch.heigvd.dai.routing.Router;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.javalin.Javalin;
@@ -39,8 +33,7 @@ public class App implements Callable<Integer> {
 
     DB.configure(options.dbUrl, options.dbUser, options.dbPassword);
 
-    Javalin app =
-        Javalin.create(
+    Javalin.create(
             config -> {
               config.jetty.defaultHost = options.address;
               config.jetty.defaultPort = options.port;
@@ -54,6 +47,7 @@ public class App implements Callable<Integer> {
                             // == null. This is backward but we can't just inverse it through
                             // configuration so this will have to do
                             mapper
+                                .enable(MapperFeature.ACCEPT_CASE_INSENSITIVE_ENUMS)
                                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                                 .registerModule(new Jdk8Module().configureReadAbsentAsNull(true));
                           }));
@@ -62,51 +56,26 @@ public class App implements Callable<Integer> {
                   cors -> {
                     cors.addRule(
                         it -> {
-                          if (Arrays.stream(options.cors).anyMatch("*"::equals)) {
+                          options.cors =
+                              Arrays.stream(options.cors)
+                                  .filter(f -> !f.isBlank())
+                                  .toArray(String[]::new);
+                          if (options.cors.length == 0
+                              || Arrays.stream(options.cors).anyMatch("*"::equals)) {
                             it.anyHost();
-                          } else {
+                          } else if (options.cors.length > 0) {
                             Arrays.stream(options.cors).forEach(it::allowHost);
                             it.allowCredentials = true;
                           }
                         });
                   });
-
               config.registerPlugin(new OpenApiPlugin(pluginConfig -> {}));
-
               config.registerPlugin(new SwaggerPlugin());
               config.registerPlugin(new ReDocPlugin());
 
-              config.router.apiBuilder(
-                  () -> {
-                    path(
-                        "/teams/{teamName}",
-                        () -> {
-                          TeamsController teamsController = new TeamsController();
-                          crud(teamsController);
-                          put(ctx -> teamsController.update(ctx, ctx.pathParam("teamName")));
-                        });
-                  });
-            });
-
-    // Global middlewares
-    app.before(new SessionMiddleware());
-
-    // Requires the user to be connected before accessing this endpoint
-    app.before("/teams", new AuthMiddleware());
-    app.before("/teams/*", new AuthMiddleware());
-
-    // Controllers
-    AuthController authController = new AuthController();
-
-    app.get("/", ctx -> ctx.result("Hello World"));
-
-    // Auth routes
-    app.post("/login", authController::login);
-    app.post("/logout", authController::logout);
-    app.get("/profile", authController::profile);
-
-    app.start();
-
+              config.router.apiBuilder(new Router());
+            })
+        .start();
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
