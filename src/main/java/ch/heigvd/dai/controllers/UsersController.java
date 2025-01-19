@@ -51,6 +51,7 @@ public class UsersController implements CrudHandler {
         List<User> users = User.getAll(User.Role.ALL);
         ctx.json(users);
       } catch (SQLException e) {
+        LOG.error(e.toString());
         throw new InternalServerErrorResponse();
       }
     }
