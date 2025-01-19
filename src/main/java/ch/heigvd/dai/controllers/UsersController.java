@@ -22,26 +22,37 @@ public class UsersController implements CrudHandler {
     private static final Logger LOG = LoggerFactory.getLogger(UsersController.class);
 
     @OpenApi(
-            path = "/users",
-            methods = HttpMethod.GET,
-            summary = "get all users",
-            operationId = "getAllUsers",
-            tags = { "User" },
-            responses = {
-                @OpenApiResponse(
-                        status = "200",
-                        content = { @OpenApiContent(from = User[].class, type = ContentType.JSON) })
-            }
+      path = "/users",
+      methods = HttpMethod.GET,
+      summary = "get all users",
+      operationId = "getAllUsers",
+      tags = { "User" },
+      responses = {
+        @OpenApiResponse(
+          status = "200",
+          description = "The list of active users ",
+          content = { @OpenApiContent(from = User[].class, type = ContentType.JSON) }),
+        @OpenApiResponse(
+          status = "401",
+          description = "User not authenticated",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "500",
+          description = "The server encountered an issue",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        )
+      }
     )
     public void getAll(Context ctx) {
-        LOG.info("Je suis dans getAll (simple)");
-        try {
-            List<User> users = User.getAll(User.Role.ALL);
-            ctx.json(users);
-        } catch (SQLException e) {
-            LOG.error(e.toString());
-            throw new InternalServerErrorResponse();
-        }
+      User currentUser = ctx.attribute("user");
+      if (currentUser == null) throw new UnauthorizedResponse();
+      try {
+        List<User> users = User.getAll(User.Role.ALL);
+        ctx.json(users);
+      } catch (SQLException e) {
+        throw new InternalServerErrorResponse();
+      }
     }
 
     @OpenApi(
@@ -134,18 +145,15 @@ public class UsersController implements CrudHandler {
         content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)})
     )
     public void update(Context ctx, String name) {
-      LOG.info("In update");
       boolean isPatch = ctx.method().equals(HandlerType.PATCH);
       User currentUser = ctx.attribute("user");
       if (currentUser == null) throw new UnauthorizedResponse();
       User userToModifiy;
       try {
         userToModifiy = User.findByName(name);
-        LOG.info("Trying to reach user");
         if (userToModifiy == null) throw new NotFoundResponse();
       } catch (SQLException e) { throw new InternalServerErrorResponse(); }
 
-      LOG.info("Check permission");
       if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
 
       UpdateRequest ur;
@@ -164,9 +172,7 @@ public class UsersController implements CrudHandler {
           .hashToString(6, ur.password.toCharArray());
       }
 
-      LOG.info("Check email");
       if (ur.email != null) {
-        LOG.info("Modifiy password");
         userToModifiy.setPrimaryContact(ur.email); }
 
       try {
@@ -188,21 +194,14 @@ public class UsersController implements CrudHandler {
       }
     )
     public void delete(Context ctx, String name) {
-      LOG.info("Dans delete");
       User currentUser = ctx.attribute("user");
       if (currentUser == null) throw new UnauthorizedResponse();
-      LOG.info(currentUser.toString());
       User userToModifiy;
       try {
-        LOG.info("Find user");
-        LOG.info(name);
         userToModifiy = User.findByName(name);
         if (userToModifiy == null) throw new NotFoundResponse();
-        LOG.info("Check permission");
         if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
-        LOG.info("Try delete");
         if (!userToModifiy.delete()) {
-          LOG.info("Delete failed");
           throw new InternalServerErrorResponse();
         }
         ctx.status(HttpStatus.NO_CONTENT);
