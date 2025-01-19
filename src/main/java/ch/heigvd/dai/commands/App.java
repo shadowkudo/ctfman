@@ -69,16 +69,13 @@ public class App implements Callable<Integer> {
                           }
                         });
                   });
-
               config.registerPlugin(new OpenApiPlugin(pluginConfig -> {}));
-
               config.registerPlugin(new SwaggerPlugin());
               config.registerPlugin(new ReDocPlugin());
 
               config.router.apiBuilder(new Router());
             })
         .start();
-
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

@@ -6,6 +6,7 @@ import ch.heigvd.dai.controllers.AuthController;
 import ch.heigvd.dai.controllers.CtfsController;
 import ch.heigvd.dai.controllers.TeamsController;
 import ch.heigvd.dai.controllers.TeamsCtfsController;
+import ch.heigvd.dai.controllers.UsersController;
 import ch.heigvd.dai.middlewares.AuthMiddleware;
 import ch.heigvd.dai.middlewares.SessionMiddleware;
 import io.javalin.apibuilder.EndpointGroup;
@@ -70,6 +71,13 @@ public class Router implements EndpointGroup {
                 crud(ctfController);
                 put(ctx -> ctfController.update(ctx, ctx.pathParam("ctf-title")));
               });
+        });
+    path(
+        "/users/{user-name}",
+        () -> {
+          UsersController usersController = new UsersController();
+          crud(usersController);
+          put(ctx -> usersController.update(ctx, ctx.pathParam("id")));
         });
 
     // Misc
