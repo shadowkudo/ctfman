@@ -65,6 +65,10 @@ public class UsersController implements CrudHandler {
         @OpenApiResponse(
             status = "403",
             description = "Only admin can create a user when logged",
+            content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)),
+        @OpenApiResponse(
+            status = "409",
+            description = "An user already exists with this name or email",
             content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON))
       })
   public void create(Context ctx) {
@@ -90,6 +94,17 @@ public class UsersController implements CrudHandler {
       else newUser.insert_manager(request.role);
       ctx.status(HttpStatus.CREATED);
     } catch (SQLException e) {
+
+      if (e.getMessage()
+          .contains("duplicate key value violates unique constraint \"authentication_pkey\"")) {
+        throw new ConflictResponse("username already taken");
+      }
+
+      if (e.getMessage()
+          .contains("duplicate key value violates unique constraint \"contact_email_key\"")) {
+        throw new ConflictResponse("email already taken");
+      }
+
       LOG.error(e.toString());
       throw new InternalServerErrorResponse();
     }
