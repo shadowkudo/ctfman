@@ -30,6 +30,7 @@ public class TeamsController implements CrudHandler {
       summary = "get all teams",
       operationId = "getAllTeams",
       tags = {"Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -57,6 +58,7 @@ public class TeamsController implements CrudHandler {
       summary = "create a team",
       operationId = "createTeam",
       tags = {"Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       requestBody =
           @OpenApiRequestBody(
               required = true,
@@ -114,6 +116,7 @@ public class TeamsController implements CrudHandler {
       summary = "get a team",
       operationId = "getOneTeam",
       tags = {"Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
@@ -154,6 +157,7 @@ public class TeamsController implements CrudHandler {
       summary = "update a team",
       operationId = "updateTeam",
       tags = {"Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
@@ -269,6 +273,7 @@ public class TeamsController implements CrudHandler {
       summary = "delete a team",
       operationId = "deleteTeam",
       tags = {"Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },

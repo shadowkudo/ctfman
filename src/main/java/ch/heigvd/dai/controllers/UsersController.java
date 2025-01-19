@@ -22,6 +22,7 @@ public class UsersController implements CrudHandler {
       summary = "get all users",
       operationId = "getAllUsers",
       tags = {"User"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -50,6 +51,7 @@ public class UsersController implements CrudHandler {
       summary = "create a user",
       operationId = "createUser",
       tags = {"User"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       requestBody =
           @OpenApiRequestBody(
               required = true,
@@ -99,6 +101,7 @@ public class UsersController implements CrudHandler {
       summary = "get a user",
       operationId = "getOneUser",
       tags = {"User"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },
@@ -130,6 +133,7 @@ public class UsersController implements CrudHandler {
       summary = "update a user",
       operationId = "updateUser",
       tags = {"User"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },
@@ -206,6 +210,7 @@ public class UsersController implements CrudHandler {
       summary = "delete a user",
       operationId = "deleteUser",
       tags = {"User"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },

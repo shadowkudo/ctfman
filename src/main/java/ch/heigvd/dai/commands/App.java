@@ -69,7 +69,16 @@ public class App implements Callable<Integer> {
                           }
                         });
                   });
-              config.registerPlugin(new OpenApiPlugin(pluginConfig -> {}));
+
+              config.registerPlugin(
+                  new OpenApiPlugin(
+                      pluginConfig -> {
+                        pluginConfig.withDefinitionConfiguration(
+                            (version, openApiDefinition) -> {
+                              openApiDefinition.withSecurity(
+                                  security -> security.withCookieAuth("CookieAuth", "session"));
+                            });
+                      }));
               config.registerPlugin(new SwaggerPlugin());
               config.registerPlugin(new ReDocPlugin());
 

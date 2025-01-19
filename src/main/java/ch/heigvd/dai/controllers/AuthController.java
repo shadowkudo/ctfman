@@ -14,6 +14,7 @@ import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
 import io.javalin.openapi.OpenApiRequired;
 import io.javalin.openapi.OpenApiResponse;
+import io.javalin.openapi.OpenApiSecurity;
 import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -150,6 +151,7 @@ public class AuthController {
       summary = "get profile information",
       operationId = "profile",
       tags = {"Auth"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       responses = {
         @OpenApiResponse(
             status = "200",
