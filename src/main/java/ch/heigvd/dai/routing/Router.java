@@ -73,12 +73,12 @@ public class Router implements EndpointGroup {
               });
         });
     path(
-      "/users/{user-name}",
-      () -> {
-        UsersController usersController = new UsersController();
-        crud(usersController);
-        put(ctx -> usersController.update(ctx, ctx.pathParam("id")));
-      });
+        "/users/{user-name}",
+        () -> {
+          UsersController usersController = new UsersController();
+          crud(usersController);
+          put(ctx -> usersController.update(ctx, ctx.pathParam("id")));
+        });
 
     // Misc
     get("/", ctx -> ctx.redirect("/swagger", HttpStatus.PERMANENT_REDIRECT));
