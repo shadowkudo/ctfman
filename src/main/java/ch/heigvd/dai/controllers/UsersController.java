@@ -6,6 +6,7 @@ import io.javalin.apibuilder.CrudHandler;
 import io.javalin.http.*;
 import io.javalin.openapi.*;
 import io.javalin.openapi.ContentType;
+import io.javalin.validation.BodyValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class UsersController implements CrudHandler {
 
@@ -101,7 +103,6 @@ public class UsersController implements CrudHandler {
         @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User.class) })
     })
     public void getOne(Context ctx, String name) {
-        LOG.info("Je suis dans getOne");
         try {
           User user = User.findByName(name);
 
@@ -115,21 +116,104 @@ public class UsersController implements CrudHandler {
         }
     }
 
-    @OpenApi(path = "/users/{id}", methods = { HttpMethod.PUT,
-            HttpMethod.PATCH }, summary = "update a user", operationId = "updateUser", tags = { "User" })
-    public void update(Context ctx, String id) {
-        LOG.info("Je suis dans update");
-        throw new MethodNotAllowedResponse();
+    @OpenApi(
+      path = "/users/{userName}",
+      methods = { HttpMethod.PUT, HttpMethod.PATCH },
+      summary = "update a user",
+      operationId = "updateUser",
+      tags = { "User" },
+      pathParams = {
+      @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+      },
+      requestBody =
+      @OpenApiRequestBody(
+        description =
+          "When using PUT, all fields are required. When using PATCH, fields can be omitted"
+            + " in which case they will keep their current value",
+        required = true,
+        content = {@OpenApiContent(from = UpdateRequest.class, type = ContentType.JSON)})
+    )
+    public void update(Context ctx, String name) {
+      LOG.info("In update");
+      boolean isPatch = ctx.method().equals(HandlerType.PATCH);
+      User currentUser = ctx.attribute("user");
+      if (currentUser == null) throw new UnauthorizedResponse();
+      User userToModifiy;
+      try {
+        userToModifiy = User.findByName(name);
+        LOG.info("Trying to reach user");
+        if (userToModifiy == null) throw new NotFoundResponse();
+      } catch (SQLException e) { throw new InternalServerErrorResponse(); }
+
+      LOG.info("Check permission");
+      if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
+
+      UpdateRequest ur;
+      if (!isPatch) {
+        ur = ctx.bodyValidator(UpdateRequest.class)
+          .check(x -> x.password != null
+            && !x.password.isBlank(), "Password can't be empty on PUT")
+          .check(x -> x.email != null
+            && !x.email.isBlank(), "Email can't be empty on PUT")
+          .get();
+      } else ur = ctx.bodyValidator(UpdateRequest.class).get();
+
+      if (ur.password != null) {
+        String hash = BCrypt.with(
+          new SecureRandom())
+          .hashToString(6, ur.password.toCharArray());
+      }
+
+      LOG.info("Check email");
+      if (ur.email != null) {
+        LOG.info("Modifiy password");
+        userToModifiy.setPrimaryContact(ur.email); }
+
+      try {
+        if (!userToModifiy.update()) throw new InternalServerErrorResponse();
+        ctx.json(userToModifiy);
+      } catch (SQLException e) {
+        throw new InternalServerErrorResponse();
+      }
     }
 
-    @OpenApi(path = "/users/{id}", methods = HttpMethod.DELETE, summary = "delete a user", operationId = "deleteUser",
-            tags = { "User" })
-    public void delete(Context ctx, String id) {
-        LOG.info("Je suis dans delete");
-        throw new MethodNotAllowedResponse();
+    @OpenApi(
+      path = "/users/{userName}",
+      methods = HttpMethod.DELETE,
+      summary = "delete a user",
+      operationId = "deleteUser",
+      tags = { "User" },
+      pathParams = {
+        @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+      }
+    )
+    public void delete(Context ctx, String name) {
+      LOG.info("Dans delete");
+      User currentUser = ctx.attribute("user");
+      if (currentUser == null) throw new UnauthorizedResponse();
+      LOG.info(currentUser.toString());
+      User userToModifiy;
+      try {
+        LOG.info("Find user");
+        LOG.info(name);
+        userToModifiy = User.findByName(name);
+        if (userToModifiy == null) throw new NotFoundResponse();
+        LOG.info("Check permission");
+        if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
+        LOG.info("Try delete");
+        if (!userToModifiy.delete()) {
+          LOG.info("Delete failed");
+          throw new InternalServerErrorResponse();
+        }
+        ctx.status(HttpStatus.NO_CONTENT);
+      } catch (SQLException e) { throw new InternalServerErrorResponse(); }
     }
 
     public static record CreateRequest(
       String name, String password, String email, User.Role role) {}
+
+    public static record UpdateRequest(
+      String password, String email
+    ) {}
 
 }

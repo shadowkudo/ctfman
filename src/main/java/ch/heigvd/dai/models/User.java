@@ -1,13 +1,10 @@
 package ch.heigvd.dai.models;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.heigvd.dai.controllers.UsersController;
 import io.javalin.http.NotFoundResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -165,6 +162,58 @@ public class User extends Authentication {
 
   }
 
+  public boolean update() throws SQLException {
+    LOG.info("Start Update");
+    String updatePassword = "UPDATE authentication SET password_hash = ? WHERE identification = ?";
+    String updatePrimaryContactContact = "UPDATE contact SET email = ? WHERE user_account = ?";
+    String updatePrimaryContactUserAccount = "UPDATE user_account SET primary_contact = ? WHERE authentication = ?";
+
+    try (Connection cnt = DB.getConnection()) {
+      LOG.info("Connection to DB");
+      cnt.setAutoCommit(false);
+
+      PreparedStatement stmt = cnt.prepareStatement(updatePassword);
+      stmt.setString(1, this.passwordHash);
+      stmt.setString(2, this.authentication);
+
+      LOG.info("Change password");
+      LOG.info(stmt.toString());
+      LOG.info(this.authentication);
+      LOG.info(this.passwordHash);
+
+      if (stmt.executeUpdate() != 1) {
+        LOG.info("Failed change password");
+        cnt.rollback();
+        return false;
+      }
+
+      stmt = cnt.prepareStatement(updatePrimaryContactContact);
+      stmt.setString(1, this.primaryContact);
+      stmt.setString(2, this.authentication);
+      LOG.info("Change Contact");
+      LOG.info(stmt.toString());
+      if (stmt.executeUpdate() != 1) {
+        LOG.info("Failed contact");
+        cnt.rollback();
+        return false;
+      }
+
+      stmt = cnt.prepareStatement(updatePrimaryContactUserAccount);
+      stmt.setString(1, this.primaryContact);
+      stmt.setString(2, this.authentication);
+      LOG.info("Change Account");
+      LOG.info(stmt.toString());
+      if (stmt.executeUpdate() != 1) {
+        LOG.info("Failed account");
+        cnt.rollback();
+        return false;
+      }
+      cnt.commit();
+    }
+    LOG.info("All good");
+    return true;
+  }
+
   public String getAuthentication() {
     return authentication;
   }
@@ -211,6 +260,8 @@ public class User extends Authentication {
     this.isAuthor = isAuthor;
   }
 
+  public boolean equals(User other) { return other.authentication.equals(this.authentication); }
+
   public Boolean hasRole(Role role) {
     return switch (role) {
       case ADMIN -> isAdmin;
@@ -219,6 +270,22 @@ public class User extends Authentication {
       case MODERATOR -> isModerator;
       case ALL -> isChallenger;
     };
+  }
+
+  public boolean delete() throws SQLException {
+    String query = "UPDATE authentication SET deleted_at = ? WHERE identification = ?";
+    try (Connection conn = DB.getConnection()) {
+      Timestamp deleteTime = new Timestamp(System.currentTimeMillis());
+      PreparedStatement stmt = conn.prepareStatement(query);
+      stmt.setTimestamp(1, deleteTime);
+      stmt.setString(2, authentication);
+      deletedAt = deleteTime;
+      if (stmt.executeUpdate() != 1) {
+        deletedAt = null;
+        return false;
+      }
+    }
+    return true;
   }
 
   public static enum Role {

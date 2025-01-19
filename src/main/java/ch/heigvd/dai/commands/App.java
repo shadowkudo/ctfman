@@ -94,6 +94,7 @@ public class App implements Callable<Integer> {
                          () -> {
                            UsersController usersController = new UsersController();
                            crud(usersController);
+                           put(ctx -> usersController.update(ctx, ctx.pathParam("id")));
                          });
                   });
                 config.router.apiBuilder(
