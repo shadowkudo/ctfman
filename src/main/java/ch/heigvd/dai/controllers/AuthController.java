@@ -8,7 +8,11 @@ import io.javalin.openapi.ContentType;
 import io.javalin.openapi.HttpMethod;
 import io.javalin.openapi.OpenApi;
 import io.javalin.openapi.OpenApiContent;
+import io.javalin.openapi.OpenApiExample;
+import io.javalin.openapi.OpenApiName;
+import io.javalin.openapi.OpenApiParam;
 import io.javalin.openapi.OpenApiRequestBody;
+import io.javalin.openapi.OpenApiRequired;
 import io.javalin.openapi.OpenApiResponse;
 import java.security.SecureRandom;
 import java.sql.SQLException;
@@ -21,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AuthController {
-  // TODO: check if there is anything more secure/better for the token
   private static final SecureRandom rnd = new SecureRandom();
   private static final Base64.Encoder encoder = Base64.getUrlEncoder().withoutPadding();
   private static final TemporalAmount VALIDITY_PERIOD = Duration.ofDays(30);
@@ -52,7 +55,9 @@ public class AuthController {
             status = "204",
             description = "login successful",
             headers = {
-              // TODO: document session header
+              @OpenApiParam(
+                  name = "Set-Cookie",
+                  example = "session=totallySecureToken; Path=/; Secure; SameSite=None")
             }),
         @OpenApiResponse(status = "401", description = "login failed, invalid username or password")
       })
@@ -60,7 +65,7 @@ public class AuthController {
     LoginRequest rq = ctx.bodyAsClass(LoginRequest.class);
 
     if (rq.username == null || rq.password == null) {
-      throw new UnauthorizedResponse();
+      throw new UnauthorizedResponse("Missing username or password");
     }
 
     try {
@@ -110,42 +115,63 @@ public class AuthController {
   @OpenApi(
       path = "/logout",
       methods = HttpMethod.POST,
-      summary = "logout",
+      summary = "Log out the user by removing their session cookie and deleting it internally",
       operationId = "logout",
       tags = {"Auth"},
       responses = {
         @OpenApiResponse(
             status = "204",
-            description = "Logged out",
+            description = "Logged out and removed the cookie",
             headers = {})
       })
   public void logout(Context ctx) {
+    String token = ctx.cookie("session");
+
     ctx.removeCookie("session");
     ctx.status(HttpStatus.NO_CONTENT);
+
+    User user = ctx.attribute("user");
+
+    if (user == null) {
+      return;
+    }
+
+    try {
+      Session.delete(token, user.getAuthentication());
+    } catch (SQLException e) {
+      LOG.error(e.toString());
+      throw new InternalServerErrorResponse();
+    }
   }
 
   @OpenApi(
       path = "/profile",
       methods = HttpMethod.GET,
-      summary = "get profile",
+      summary = "get profile information",
       operationId = "profile",
       tags = {"Auth"},
       responses = {
         @OpenApiResponse(
             status = "200",
             description = "Profile details",
-            content = {@OpenApiContent(from = User.class)})
+            content = {@OpenApiContent(from = User.class)}),
+        @OpenApiResponse(
+            status = "401",
+            description = "User not authenticated",
+            content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON))
       })
   public void profile(Context ctx) {
     User user = ctx.attribute("user");
 
     if (user == null) {
-      ctx.status(HttpStatus.UNAUTHORIZED);
-      return;
+      throw new UnauthorizedResponse();
     }
 
     ctx.json(user);
   }
 
-  public record LoginRequest(String username, String password) {}
+  @OpenApiName("LoginRequest")
+  public record LoginRequest(
+      @OpenApiExample("user1") @OpenApiRequired String username,
+      @OpenApiExample("password") @OpenApiRequired String password) {}
 }
