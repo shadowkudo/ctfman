@@ -258,7 +258,7 @@ public class Ctf {
   public int update() throws SQLException {
     String query =
         "UPDATE ctf SET title = ?, description = ?, admin = ?, localisation = ?, started_at = ?,"
-            + " ended_at = ? WHERE title = ?";
+            + " ended_at = ?, status = ? WHERE title = ?";
 
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
@@ -269,7 +269,8 @@ public class Ctf {
       stmt.setString(4, localisation);
       stmt.setTimestamp(5, Optional.ofNullable(startedAt).map(Timestamp::from).orElse(null));
       stmt.setTimestamp(6, Optional.ofNullable(endedAt).map(Timestamp::from).orElse(null));
-      stmt.setString(7, oldTitle);
+      stmt.setObject(7, this.status.toString(), java.sql.Types.OTHER);
+      stmt.setString(8, oldTitle);
 
       return stmt.executeUpdate();
     }
