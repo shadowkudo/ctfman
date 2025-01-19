@@ -122,7 +122,7 @@ public class UsersController implements CrudHandler {
       operationId = "getOneUser",
       tags = { "User" },
       pathParams = {
-        @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+        @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },
       responses = {
         @OpenApiResponse(
@@ -154,13 +154,13 @@ public class UsersController implements CrudHandler {
     }
 
     @OpenApi(
-      path = "/users/{userName}",
+      path = "/users/{user-name}",
       methods = { HttpMethod.PUT, HttpMethod.PATCH },
       summary = "update a user",
       operationId = "updateUser",
       tags = { "User" },
       pathParams = {
-      @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+      @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       },
       requestBody =
       @OpenApiRequestBody(
@@ -210,13 +210,13 @@ public class UsersController implements CrudHandler {
     }
 
     @OpenApi(
-      path = "/users/{userName}",
+      path = "/users/{user-name}",
       methods = HttpMethod.DELETE,
       summary = "delete a user",
       operationId = "deleteUser",
       tags = { "User" },
       pathParams = {
-        @OpenApiParam(name = "userName", type = String.class, description = "The user name")
+        @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
       }
     )
     public void delete(Context ctx, String name) {
