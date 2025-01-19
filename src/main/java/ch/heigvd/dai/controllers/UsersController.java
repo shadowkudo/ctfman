@@ -244,6 +244,32 @@ public class UsersController implements CrudHandler {
       tags = { "User" },
       pathParams = {
         @OpenApiParam(name = "user-name", type = String.class, description = "The user name")
+      },
+      responses = {
+        @OpenApiResponse(
+          status = "204",
+          description = "The user has been successfully deleted"
+        ),
+        @OpenApiResponse(
+          status = "401",
+          description = "Need to be connected to delete",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "403",
+          description = "Admin permission or self account deleting",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "404",
+          description = "The user to delete wasn't found",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "500",
+          description = "The server encountered an issue",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        )
       }
     )
     public void delete(Context ctx, String name) {
@@ -253,19 +279,19 @@ public class UsersController implements CrudHandler {
       try {
         userToModifiy = User.findByName(name);
         if (userToModifiy == null) throw new NotFoundResponse();
-        if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
+        if (!currentUser.equals(userToModifiy) && !currentUser.hasRole(User.Role.ADMIN)) throw new ForbiddenResponse();
         if (!userToModifiy.delete()) {
           throw new InternalServerErrorResponse();
         }
         ctx.status(HttpStatus.NO_CONTENT);
-      } catch (SQLException e) { throw new InternalServerErrorResponse(); }
+      } catch (SQLException e) {
+        LOG.error(e.toString());
+        throw new InternalServerErrorResponse();
+      }
     }
 
-    public static record CreateRequest(
-      String name, String password, String email, User.Role role) {}
+    public static record CreateRequest(String name, String password, String email, User.Role role) {}
 
-    public static record UpdateRequest(
-      String password, String email
-    ) {}
+    public static record UpdateRequest(String password, String email) {}
 
 }
