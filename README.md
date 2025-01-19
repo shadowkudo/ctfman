@@ -22,7 +22,7 @@
         <a href="#documentation">Documentation</a>
       <ul>
         <li>
-            <a href="#vm-azure">VM with Azure</a>
+            <a href="#vm---azure">VM with Azure</a>
           <ul>
             <li><a href="#installation">Installation</a></li>
             <li><a href="#configuration">Configuration</a></li>
@@ -36,7 +36,7 @@
         <a href="#usage">Usage</a>
       <ul>
         <li><a href="#examples-using-curl">Curl</a></li>
-        <li><a href="#examples-using-ui-on-a-web-browser">UI on web browser</a></li>
+        <li><a href="#examples-using-the-ui-on-a-web-browser">UI on web browser</a></li>
       </ul>
     </li>
     <li><a href="#license">License</a></li>
@@ -54,6 +54,7 @@
 - [Swagger][swagger]
 - [Javalin][javalin]
 - [Microsoft Azure][azure]
+- [SvelteKit][sveltekit]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -72,6 +73,8 @@ The goal of `CTFman` - a web application using a database - is to efficiently ma
 
 > [!CAUTION]
 > Hacking is not necessarily a negative practice. In fact, it plays an essential role in learning and discovering existing vulnerabilities in computer systems. Through disciplines like CTF (Capture the Flag), cybersecurity enthusiasts can develop skills by identifying potential flaws and understanding how they could be exploited. This knowledge is then used to strengthen system security and prevent future attacks. Thus, ethical hacking or "white hat" hacking actively contributes to the protection of digital infrastructures by anticipating risks and proposing solutions.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
 
@@ -103,6 +106,10 @@ The goal of `CTFman` - a web application using a database - is to efficiently ma
   winget install EclipseAdoptium.Temurin.21.JDK
   ```
 
+### For Developer
+
+If are a standard user go [here](https://github.com/shadowkudo/ctfman/edit/main/README.md#usage).
+
 #### Running in local
 
 Clone this repository with either `ssh` or `http`, but we recommend using `ssh` as it is more secure.
@@ -130,6 +137,9 @@ docker build -t ghcr.io/<username>/ctfman:latest
 docker push ghcr.io/<username>/ctfman:latest
 ```
 
+> [!NOTE]
+> We used GitHub Actions so that it publishes automaticaly when new commit is done in main branch.
+
 #### Running with Docker Compose
 
 Run the application using Docker Compose:
@@ -137,6 +147,8 @@ Run the application using Docker Compose:
 ```sh
 docker compose --profile dev up -d
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- DOCUMENTATION -->
 
@@ -239,6 +251,8 @@ Install and configure Docker and Docker Compose on the virtual machine. You will
 
 Congratulations! You have now an up-to-date and configured virtual machine to use.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Zone DNS
 
 For the server to be accessible easily on the Internet, you need to set up a DNS - Domain Name Server - so that you will use a name instead of a ip address to access the server remotely.
@@ -290,6 +304,8 @@ With `Swagger`, documentation is created during coding; see the endpoint `https:
 > [!NOTE]
 > It is recommended to use `swagger` as you can try the API easily.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- USAGE -->
 #### Usage
 
@@ -309,6 +325,11 @@ docker compose up prod -d
 ```sh
 firefox https://ctfman.cybernest.ch
 ```
+
+> [!IMPORTANT]
+> You can go directly to step 4, as you do not have access to the server. In case a problem occur, create an issue here with the tag `bug` and we will try our best to support you!
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 #### Examples using Curl
 
@@ -387,6 +408,8 @@ set-cookie: session=; Path=/; Expires=Thu, 01-Jan-1970 00:00:00 GMT; Max-Age=0
 > [!NOTE]
 > I think with those examples, you understood how it works. For others endpoints it will work the same way; be careful to never forget the cookie in the request !
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 #### Examples using the UI on a web browser
 
 The following examples have been made with [Firefox][firefox].
@@ -422,6 +445,8 @@ Team details:
 > [!NOTE]
 > It will work the same way for other field like CTF.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- CONTRIBUTING -->
 
 ## Contributing
@@ -448,9 +473,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contacts
 
-- [Mondotosz](https://github.com/Mondotosz)
-- [Shadowkudo](https://github.com/shadowkudo)
-- [Arnoheigvd](https://github.com/arnoheigvd)
+- [Kénan Augsburger](https://github.com/Mondotosz)
+- [David Schildböck](https://github.com/shadowkudo)
+- [Arno Tribolet](https://github.com/arnoheigvd)
 
 > [!IMPORTANT]
 > Have fun !
@@ -472,3 +497,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [duckdns]: http://www.duckdns.org/
 [polisystems]: https://polisystems.ch/en/index
 [firefox]: https://www.mozilla.org/en-US/firefox/new/
+[sveltekit]: https://svelte.dev/tutorial/kit/introducing-sveltekit
