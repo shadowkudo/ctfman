@@ -232,7 +232,5 @@ CREATE CONSTRAINT TRIGGER challenge_vulnerabilities_check
     FOR EACH ROW
     EXECUTE FUNCTION check_vulnerabilities();
 
--- team can't join a ctf unless the ctf status is 'ready' or 'in progress'
-
 COMMIT;
 ROLLBACK;
