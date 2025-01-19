@@ -37,6 +37,8 @@ public class App implements Callable<Integer> {
             config -> {
               config.jetty.defaultHost = options.address;
               config.jetty.defaultPort = options.port;
+              config.http.generateEtags = true;
+
               config.jsonMapper(
                   new JavalinJackson()
                       .updateMapper(
