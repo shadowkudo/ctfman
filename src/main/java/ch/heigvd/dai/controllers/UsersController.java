@@ -57,21 +57,37 @@ public class UsersController implements CrudHandler {
     }
 
     @OpenApi(
-            path = "/users",
-            methods = HttpMethod.POST,
-            summary = "create a user",
-            operationId = "createUser",
-            tags = { "User" },
-            requestBody = @OpenApiRequestBody(
-                    required = true,
-                    content = @OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)
-            ),
-            responses = {
-                    @OpenApiResponse(
-                      status = "201",
-                      description = "Resource created")
-            }
+      path = "/users",
+      methods = HttpMethod.POST,
+      summary = "create a user",
+      operationId = "createUser",
+      tags = { "User" },
+      requestBody = @OpenApiRequestBody(
+        required = true,
+        content = @OpenApiContent(from = CreateRequest.class, type = ContentType.JSON)
+      ),
+      responses = {
+        @OpenApiResponse(
+          status = "201",
+          description = "User created"
+        ),
+        @OpenApiResponse(
+          status = "400",
+          description = "Unlogged users can only create CHALLENGER account",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "403",
+          description = "Only admin can create a user when logged",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "500",
+          description = "The server encountered an issue",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
         )
+      }
+    )
     public void create(Context ctx) {
       User user = ctx.attribute("user");
       User newUser;
@@ -85,15 +101,11 @@ public class UsersController implements CrudHandler {
 
       if (user == null) {
         if (request.role != User.Role.CHALLENGER) throw new BadRequestResponse();
-      } else if (!user.hasRole(User.Role.ADMIN)) throw new BadRequestResponse();
+      } else if (!user.hasRole(User.Role.ADMIN)) throw new UnauthorizedResponse();
       /* Encrypt Password*/
       String hash = BCrypt.with(new SecureRandom()).hashToString(6, request.password.toCharArray());
       /* Create new User */
-      newUser = new User(
-        request.name,
-        request.email,
-        hash,
-        request.role);
+      newUser = new User(request.name, request.email, hash, request.role);
       try {
         if (newUser.hasRole(User.Role.CHALLENGER)) newUser.insert_challenger();
         else newUser.insert_manager(request.role);
