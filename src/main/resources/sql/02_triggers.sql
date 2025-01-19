@@ -226,7 +226,7 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS challenge_vulnerabilities_check ON challenge CASCADE;
-CREATE TRIGGER challenge_vulnerabilities_check
+CREATE CONSTRAINT TRIGGER challenge_vulnerabilities_check
     AFTER INSERT ON challenge
     DEFERRABLE
     FOR EACH ROW
