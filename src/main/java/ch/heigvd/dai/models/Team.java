@@ -1,6 +1,8 @@
 package ch.heigvd.dai.models;
 
 import ch.heigvd.dai.db.DB;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.javalin.openapi.OpenApiExample;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 public class Team extends Authentication {
 
   private String authentication;
-  private String oldAuthentication;
+  @JsonIgnore private String oldAuthentication;
   private String description;
   private String country;
   private String captain;
@@ -47,6 +49,7 @@ public class Team extends Authentication {
     this.oldAuthentication = authentication;
   }
 
+  @OpenApiExample("Team 1")
   public String getAuthentication() {
     return authentication;
   }
@@ -55,6 +58,7 @@ public class Team extends Authentication {
     this.authentication = authentication;
   }
 
+  @OpenApiExample("Lorem ipsum dolor sit amet.")
   public String getDescription() {
     return description;
   }
@@ -63,6 +67,7 @@ public class Team extends Authentication {
     this.description = description;
   }
 
+  @OpenApiExample("Switzerland")
   public String getCountry() {
     return country;
   }
@@ -71,6 +76,7 @@ public class Team extends Authentication {
     this.country = country;
   }
 
+  @OpenApiExample("user1")
   public String getCaptain() {
     return captain;
   }

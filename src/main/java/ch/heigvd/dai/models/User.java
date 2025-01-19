@@ -1,17 +1,16 @@
 package ch.heigvd.dai.models;
 
+import static org.eclipse.jetty.http.HttpParser.LOG;
+
+import ch.heigvd.dai.db.DB;
+import io.javalin.http.NotFoundResponse;
+import io.javalin.openapi.OpenApiExample;
+import io.javalin.openapi.OpenApiName;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import ch.heigvd.dai.controllers.UsersController;
-import io.javalin.http.NotFoundResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import ch.heigvd.dai.db.DB;
-
-import static org.eclipse.jetty.http.HttpParser.LOG;
 
 public class User extends Authentication {
 
@@ -33,16 +32,34 @@ public class User extends Authentication {
     this.authentication = name;
     this.primaryContact = primaryContact;
     switch (role) {
-      case ADMIN: isAdmin = true; break;
-      case MODERATOR: isModerator = true; break;
-      case AUTHOR: isAuthor = true; break;
-      case CHALLENGER: isChallenger = true; break;
-      case null, default: isChallenger = true; break;
+      case ADMIN:
+        isAdmin = true;
+        break;
+      case MODERATOR:
+        isModerator = true;
+        break;
+      case AUTHOR:
+        isAuthor = true;
+        break;
+      case CHALLENGER:
+        isChallenger = true;
+        break;
+      case null, default:
+        isChallenger = true;
+        break;
     }
   }
 
-  public User(String name, String primaryContact, String passwordHash, Timestamp createdAt, Timestamp deletedAt,
-      Boolean isChallenger, Boolean isAdmin, Boolean isModerator, Boolean isAuthor) {
+  public User(
+      String name,
+      String primaryContact,
+      String passwordHash,
+      Timestamp createdAt,
+      Timestamp deletedAt,
+      Boolean isChallenger,
+      Boolean isAdmin,
+      Boolean isModerator,
+      Boolean isAuthor) {
     super(passwordHash, createdAt, deletedAt);
     this.authentication = name;
     this.primaryContact = primaryContact;
@@ -53,8 +70,7 @@ public class User extends Authentication {
   }
 
   /**
-   * Find a user by name.
-   * This includes information on whether the user is a
+   * Find a user by name. This includes information on whether the user is a
    * challenger/admin/moderator/author
    */
   public static @Nullable User findByName(@NotNull String name) throws SQLException {
@@ -77,7 +93,6 @@ public class User extends Authentication {
             res.getBoolean("is_moderator"),
             res.getBoolean("is_author"));
       }
-
     }
 
     return null;
@@ -86,29 +101,35 @@ public class User extends Authentication {
   public static List<User> getAll(Role role) throws SQLException {
     List<User> list = new ArrayList<>();
     /* Create the query to get the role asked */
-    String query = switch (role) {
-      case ADMIN -> "SELECT au.identification " +
-        " FROM admin a " +
-        " JOIN authentication au ON a.manager = au.identification " +
-        " WHERE au.deleted_at IS NULL;";
-      case MODERATOR -> "SELECT au.identification " +
-        " FROM moderator m " +
-        " JOIN authentication au ON m.manager = au.identification " +
-        " WHERE au.deleted_at IS NULL;";
-      case AUTHOR -> "SELECT au.identification " +
-        " FROM author a " +
-        " JOIN authentication au ON a.manager = au.identification " +
-        " WHERE au.deleted_at IS NULL;";
-      case CHALLENGER -> "SELECT au.identification " +
-        " FROM challenger ch " +
-        " JOIN authentication au ON ch.user_account = au.identification " +
-        " WHERE au.deleted_at IS NULL;";
-      case ALL -> "SELECT au.identification" +
-        " FROM user_account ua" +
-        " JOIN authentication au ON au.identification = ua.authentication" +
-        " WHERE au.deleted_at IS NULL;";
-      default -> throw new NotFoundResponse();
-    };
+    String query =
+        switch (role) {
+          case ADMIN ->
+              "SELECT au.identification "
+                  + " FROM admin a "
+                  + " JOIN authentication au ON a.manager = au.identification "
+                  + " WHERE au.deleted_at IS NULL;";
+          case MODERATOR ->
+              "SELECT au.identification "
+                  + " FROM moderator m "
+                  + " JOIN authentication au ON m.manager = au.identification "
+                  + " WHERE au.deleted_at IS NULL;";
+          case AUTHOR ->
+              "SELECT au.identification "
+                  + " FROM author a "
+                  + " JOIN authentication au ON a.manager = au.identification "
+                  + " WHERE au.deleted_at IS NULL;";
+          case CHALLENGER ->
+              "SELECT au.identification "
+                  + " FROM challenger ch "
+                  + " JOIN authentication au ON ch.user_account = au.identification "
+                  + " WHERE au.deleted_at IS NULL;";
+          case ALL ->
+              "SELECT au.identification"
+                  + " FROM user_account ua"
+                  + " JOIN authentication au ON au.identification = ua.authentication"
+                  + " WHERE au.deleted_at IS NULL;";
+          default -> throw new NotFoundResponse();
+        };
 
     try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = conn.prepareStatement(query);
@@ -121,19 +142,19 @@ public class User extends Authentication {
 
   public void insert_challenger() throws SQLException {
     String query = "CALL create_challenger(?,?,?,NULL,NULL,NULL,NULL)";
-    try (Connection conn = DB.getConnection()){
-    PreparedStatement stmt = DB.getConnection().prepareStatement(query);
-    stmt.setString(1, this.authentication);
-    stmt.setString(2, this.passwordHash);
-    stmt.setString(3, this.primaryContact);
-    LOG.info(stmt.toString());
-    stmt.executeUpdate();
+    try (Connection conn = DB.getConnection()) {
+      PreparedStatement stmt = DB.getConnection().prepareStatement(query);
+      stmt.setString(1, this.authentication);
+      stmt.setString(2, this.passwordHash);
+      stmt.setString(3, this.primaryContact);
+      LOG.info(stmt.toString());
+      stmt.executeUpdate();
     }
   }
 
   public void insert_manager(Role role) throws SQLException {
     String query = "CALL create_manager(?,?,?,NULL,?,?,?)";
-    try (Connection conn = DB.getConnection()){
+    try (Connection conn = DB.getConnection()) {
       PreparedStatement stmt = DB.getConnection().prepareStatement(query);
       stmt.setString(1, this.authentication);
       stmt.setString(2, this.passwordHash);
@@ -157,14 +178,14 @@ public class User extends Authentication {
       LOG.info(stmt.toString());
       stmt.executeUpdate();
     }
-
   }
 
   public boolean update() throws SQLException {
     LOG.info("Start Update");
     String updatePassword = "UPDATE authentication SET password_hash = ? WHERE identification = ?";
     String updatePrimaryContactContact = "UPDATE contact SET email = ? WHERE user_account = ?";
-    String updatePrimaryContactUserAccount = "UPDATE user_account SET primary_contact = ? WHERE authentication = ?";
+    String updatePrimaryContactUserAccount =
+        "UPDATE user_account SET primary_contact = ? WHERE authentication = ?";
 
     try (Connection cnt = DB.getConnection()) {
       LOG.info("Connection to DB");
@@ -202,6 +223,7 @@ public class User extends Authentication {
     return true;
   }
 
+  @OpenApiExample("user1")
   public String getAuthentication() {
     return authentication;
   }
@@ -210,6 +232,7 @@ public class User extends Authentication {
     this.authentication = authentication;
   }
 
+  @OpenApiExample("user1@hotmail.com")
   public String getPrimaryContact() {
     return primaryContact;
   }
@@ -218,6 +241,7 @@ public class User extends Authentication {
     this.primaryContact = primaryContact;
   }
 
+  @OpenApiExample("true")
   public Boolean getIsChallenger() {
     return isChallenger;
   }
@@ -226,12 +250,16 @@ public class User extends Authentication {
     this.isChallenger = isChallenger;
   }
 
-  public Boolean getIsAdmin() { return isAdmin; }
+  @OpenApiExample("false")
+  public Boolean getIsAdmin() {
+    return isAdmin;
+  }
 
   public void setIsAdmin(Boolean isAdmin) {
     this.isAdmin = isAdmin;
   }
 
+  @OpenApiExample("false")
   public Boolean getIsModerator() {
     return isModerator;
   }
@@ -240,6 +268,7 @@ public class User extends Authentication {
     this.isModerator = isModerator;
   }
 
+  @OpenApiExample("false")
   public Boolean getIsAuthor() {
     return isAuthor;
   }
@@ -248,7 +277,9 @@ public class User extends Authentication {
     this.isAuthor = isAuthor;
   }
 
-  public boolean equals(User other) { return other.authentication.equals(this.authentication); }
+  public boolean equals(User other) {
+    return other.authentication.equals(this.authentication);
+  }
 
   public Boolean hasRole(Role role) {
     return switch (role) {
@@ -276,8 +307,12 @@ public class User extends Authentication {
     return true;
   }
 
+  @OpenApiName("UserRole")
   public static enum Role {
-    CHALLENGER, ADMIN, MODERATOR, AUTHOR, ALL
+    CHALLENGER,
+    ADMIN,
+    MODERATOR,
+    AUTHOR,
+    ALL
   }
-
 }

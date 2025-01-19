@@ -2,7 +2,9 @@ package ch.heigvd.dai.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.javalin.openapi.OpenApiPropertyType;
 import java.sql.Timestamp;
+import java.time.Instant;
 import org.jetbrains.annotations.Nullable;
 
 public class Authentication {
@@ -31,6 +33,7 @@ public class Authentication {
     this.passwordHash = passwordHash;
   }
 
+  @OpenApiPropertyType(definedBy = Instant.class)
   public Timestamp getCreatedAt() {
     return createdAt;
   }
@@ -39,6 +42,7 @@ public class Authentication {
     this.createdAt = createdAt;
   }
 
+  @OpenApiPropertyType(definedBy = Instant.class)
   public Timestamp getDeletedAt() {
     return deletedAt;
   }
