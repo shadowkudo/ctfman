@@ -28,6 +28,7 @@ public class TeamsCtfsController {
       summary = "get all the ctfs of a team",
       operationId = "getAllTeamCTFs",
       tags = {"CTF", "Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
@@ -62,6 +63,7 @@ public class TeamsCtfsController {
       summary = "Join a ctf as the team",
       operationId = "teamJoinCTF",
       tags = {"CTF", "Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name")
       },
@@ -154,6 +156,7 @@ public class TeamsCtfsController {
       summary = "get the ctf details",
       operationId = "getOneTeamCTF",
       tags = {"CTF", "Team"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "team-name", type = String.class, description = "The team name"),
         @OpenApiParam(name = "ctf-title", type = String.class, description = "The ctf title")

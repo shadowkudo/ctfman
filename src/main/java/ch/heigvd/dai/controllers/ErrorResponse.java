@@ -1,5 +1,6 @@
 package ch.heigvd.dai.controllers;
 
+import io.javalin.openapi.OpenApiExample;
 import java.util.Map;
 
 /**
@@ -21,14 +22,17 @@ class ErrorResponse {
     this.details = details;
   }
 
+  @OpenApiExample("Forbidden")
   public String getTitle() {
     return title;
   }
 
+  @OpenApiExample("403")
   public int getStatus() {
     return status;
   }
 
+  @OpenApiExample("https://javalin.io/documentation#forbiddenresponse")
   public String getType() {
     return type;
   }

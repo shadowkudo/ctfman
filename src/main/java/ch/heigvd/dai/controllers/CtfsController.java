@@ -31,6 +31,7 @@ public class CtfsController implements CrudHandler {
       summary = "get all the ctfs",
       operationId = "getAllCTFs",
       tags = {"CTF"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       responses = {
         @OpenApiResponse(
             status = "200",
@@ -58,6 +59,7 @@ public class CtfsController implements CrudHandler {
       summary = "create a ctf",
       operationId = "createCTF",
       tags = {"CTF"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       requestBody =
           @OpenApiRequestBody(
               required = true,
@@ -161,6 +163,7 @@ public class CtfsController implements CrudHandler {
       summary = "get a ctf",
       operationId = "getOneCTF",
       tags = {"CTF"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "ctf-title", type = String.class, description = "The ctf title")
       },
@@ -202,6 +205,7 @@ public class CtfsController implements CrudHandler {
       summary = "update a ctf",
       operationId = "updateCTF",
       tags = {"CTF"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "ctf-title", type = String.class, description = "The ctf title")
       },
@@ -340,6 +344,7 @@ public class CtfsController implements CrudHandler {
       summary = "delete a ctf",
       operationId = "deleteCTF",
       tags = {"CTF"},
+      security = {@OpenApiSecurity(name = "CookieAuth")},
       pathParams = {
         @OpenApiParam(name = "ctf-title", type = String.class, description = "The ctf title")
       },

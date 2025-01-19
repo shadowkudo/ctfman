@@ -3,6 +3,7 @@ package ch.heigvd.dai.models;
 import ch.heigvd.dai.db.DB;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.javalin.openapi.OpenApiExample;
+import io.javalin.openapi.OpenApiName;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,6 +26,7 @@ public class Ctf {
   @Nullable private Instant endedAt;
   private String oldTitle;
 
+  @OpenApiName("CtfStatus")
   public static enum Status {
     WIP("wip"),
     READY("ready"),
