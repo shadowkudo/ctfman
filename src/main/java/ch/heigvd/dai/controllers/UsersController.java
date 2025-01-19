@@ -111,11 +111,12 @@ public class UsersController implements CrudHandler {
         else newUser.insert_manager(request.role);
         ctx.status(HttpStatus.CREATED);
       } catch (SQLException e) {
+        LOG.error(e.toString());
         throw new InternalServerErrorResponse();
       }
     }
 
-    @OpenApi(path = "/users/{userName}",
+    @OpenApi(path = "/users/{user-name}",
       methods = HttpMethod.GET,
       summary = "get a user",
       operationId = "getOneUser",
@@ -124,18 +125,30 @@ public class UsersController implements CrudHandler {
         @OpenApiParam(name = "userName", type = String.class, description = "The user name")
       },
       responses = {
-        @OpenApiResponse(status = "200", content = { @OpenApiContent(from = User.class) })
+        @OpenApiResponse(
+          status = "200",
+          description = "The user details",
+          content = @OpenApiContent(from = User.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "404",
+          description = "User not found",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        ),
+        @OpenApiResponse(
+          status = "500",
+          description = "The server encountered an issue",
+          content = @OpenApiContent(from = ErrorResponse.class, type = ContentType.JSON)
+        )
     })
     public void getOne(Context ctx, String name) {
         try {
           User user = User.findByName(name);
-
           if (user == null) throw new NotFoundResponse();
-
           ctx.status(HttpStatus.OK);
           ctx.json(user);
-
         } catch (SQLException e) {
+          LOG.error(e.toString());
           throw new InternalServerErrorResponse();
         }
     }
