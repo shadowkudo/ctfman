@@ -196,7 +196,7 @@ CREATE FUNCTION check_categories()
 BEGIN
     IF 1 > (
         SELECT COUNT(*) FROM challenge_category cc
-        WHERE NEW.challenge = cc.challenge
+        WHERE NEW.title = cc.challenge
     ) THEN RAISE 'the challenge has no categories';
 END IF;
 RETURN NEW;
@@ -218,8 +218,8 @@ CREATE FUNCTION check_vulnerabilities()
 BEGIN
     IF 1 > (
         SELECT COUNT(*) FROM challenge_has_vulnerability cv
-        WHERE NEW.title = cv.challenge
-    ) THEN RAISE 'the challenge has no vulnerabilities';
+        WHERE NEW.cve = cv.vulnerability
+    ) THEN RAISE 'the vulnerability has no challenge';
 END IF;
 RETURN NEW;
 END;
@@ -227,7 +227,7 @@ $$;
 
 DROP TRIGGER IF EXISTS challenge_vulnerabilities_check ON challenge CASCADE;
 CREATE CONSTRAINT TRIGGER challenge_vulnerabilities_check
-    AFTER INSERT ON challenge
+    AFTER INSERT ON vulnerability
     DEFERRABLE
     FOR EACH ROW
     EXECUTE FUNCTION check_vulnerabilities();
