@@ -45,11 +45,7 @@ The link to access the API with the documentation &rarr; [https://api.ctfman.cyb
 
 ---
 
-<!-- _Slide 4: Implementation choices -->
-
-# Implementation choices
-
----
+<!-- _Slide 4: Security -->
 
 <!--
 Filler content:
@@ -82,6 +78,8 @@ BCrypt.verifier()
 
 ---
 
+<!-- _Slide 5: Caching -->
+
 # Caching
 
 - Problems
@@ -95,7 +93,7 @@ BCrypt.verifier()
 
 ---
 
-<!-- _Slide 5: Conclusion_ -->
+<!-- _Slide 6: Conclusion_ -->
 
 # Conclusion
 
@@ -119,7 +117,7 @@ BCrypt.verifier()
   }
 </style>
 
-![bg right fit](presentation_assets/question.gif)
+![bg right fit](assets/question.gif)
 
 <div class="bottom-left-text">&rarr; Check out our <strong>README.md</strong> for more details!</div>
 
