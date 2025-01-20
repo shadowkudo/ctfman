@@ -82,6 +82,19 @@ BCrypt.verifier()
 
 ---
 
+# Caching
+
+- Problems
+  - Needs to be tied to the database
+  - No `updated_at` fields
+  - Still needs to query the database
+- Framework level caching
+  - Easy to setup
+  - ETag based
+  - Kind of placebo
+
+---
+
 <!-- _Slide 5: Conclusion_ -->
 
 # Conclusion
