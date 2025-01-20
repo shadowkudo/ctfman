@@ -121,6 +121,4 @@ BCrypt.verifier()
 
 <div class="bottom-left-text">&rarr; Check out our <strong>README.md</strong> for more details!</div>
 
----
-
 <!-- _Ending_ -->
