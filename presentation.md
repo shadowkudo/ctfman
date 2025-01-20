@@ -35,7 +35,18 @@ by **ChatGPT**
 
 ---
 
-<!-- _Slide 3: Demo -->
+<!--
+_Slide 3: Demo
+
+- API
+  - AUTH
+  - CREATE CTF
+  - Talk about CookieAuth
+- CLIENT
+  - Create user
+  - Create team
+  - Join ctf
+-->
 
 # Demo
 
