@@ -1,3 +1,6 @@
+> [!WARNING]
+> The vm has been shut down and the subdomain name deleted (ctfman)!
+
 # CTFman
 
 <a name="readme-top"></a>
